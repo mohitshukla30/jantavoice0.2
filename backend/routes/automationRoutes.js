@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { getRules, toggleRule, getLogs, manualRun } = require('../controllers/automationController');
-const { protect, authorize } = require('../middleware/auth'); // assuming authorize requires 'admin'
+const { protect, adminOnly } = require('../middleware/auth');
 
 // Admin only routes
 router.use(protect);

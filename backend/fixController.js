@@ -1,4 +1,6 @@
-const mongoose = require("mongoose");
+const fs = require("fs");
+
+const content = `const mongoose = require("mongoose");
 const cron = require("node-cron");
 const Complaint = require("../models/Complaint");
 const GovTicket = require("../models/GovTicket");
@@ -84,16 +86,16 @@ const checkTicketStatusInternal = async (ticket) => {
 
     let newStatus = ticket.currentStatus;
 
-    if (daysElapsed >= 25 && ticket.currentStatus !== "Disposed ï¿½ Action Taken") {
-        newStatus = "Disposed ï¿½ Action Taken";
+    if (daysElapsed >= 25 && ticket.currentStatus !== "Disposed — Action Taken") {
+        newStatus = "Disposed — Action Taken";
     } else if (daysElapsed >= 15 && daysElapsed < 25 && ticket.currentStatus !== "Field Visit Scheduled") {
         newStatus = "Field Visit Scheduled";
-    } else if (daysElapsed >= 5 && daysElapsed < 15 && ticket.currentStatus !== "Sent to Ministry ï¿½ Awaiting Action") {
-        newStatus = "Sent to Ministry ï¿½ Awaiting Action";
-    } else if (daysElapsed >= 2 && daysElapsed < 5 && ticket.currentStatus !== "Under Process ï¿½ Assigned to Department") {
-        newStatus = "Under Process ï¿½ Assigned to Department";
+    } else if (daysElapsed >= 5 && daysElapsed < 15 && ticket.currentStatus !== "Sent to Ministry — Awaiting Action") {
+        newStatus = "Sent to Ministry — Awaiting Action";
+    } else if (daysElapsed >= 2 && daysElapsed < 5 && ticket.currentStatus !== "Under Process — Assigned to Department") {
+        newStatus = "Under Process — Assigned to Department";
     } else if (daysElapsed < 2 && ticket.currentStatus === "Submitted") {
-        newStatus = "Submitted ï¿½ Pending Review";
+        newStatus = "Submitted — Pending Review";
     }
 
     ticket.lastChecked = now;
@@ -125,7 +127,7 @@ const checkTicketStatusInternal = async (ticket) => {
             isAutoUpdate: true
         });
 
-        if (newStatus === "Disposed ï¿½ Action Taken") {
+        if (newStatus === "Disposed — Action Taken") {
             ticket.isResolved = true;
         }
 
@@ -241,3 +243,5 @@ module.exports = {
     startGovCheckCron,
     getAllGovTickets
 };
+`;
+fs.writeFileSync("controllers/govPortalController.js", content);
