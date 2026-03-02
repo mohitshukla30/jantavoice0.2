@@ -12,6 +12,7 @@ import FeedPage from './pages/FeedPage';
 import ReportPage from './pages/ReportPage';
 import ComplaintDetailPage from './pages/ComplaintDetailPage';
 import MyComplaintsPage from './pages/MyComplaintsPage';
+import GovTrackingPage from './pages/GovTrackingPage';
 import AdminPage from './pages/AdminPage';
 import NotificationsPage from './pages/NotificationsPage';
 
@@ -46,7 +47,7 @@ function AppContent() {
       try {
         const { data } = await notifAPI.getAll();
         setUnread(data.unread || 0);
-      } catch {}
+      } catch { }
     };
     fetchUnread();
     const interval = setInterval(fetchUnread, 30000);
@@ -64,6 +65,7 @@ function AppContent() {
         <Route path="/complaint/:id" element={<ComplaintDetailPage />} />
         <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
         <Route path="/my-complaints" element={<ProtectedRoute><MyComplaintsPage /></ProtectedRoute>} />
+        <Route path="/gov-tracking" element={<ProtectedRoute><GovTrackingPage /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
         <Route path="*" element={

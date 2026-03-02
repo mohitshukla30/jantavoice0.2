@@ -49,6 +49,9 @@ const complaintSchema = new mongoose.Schema({
   adminNote: { type: String, default: '', maxlength: 500 },
   aiSummary: { type: String, default: '' },
   views: { type: Number, default: 0 },
+  formalLetter: { type: String, default: '' },
+  referenceNumber: { type: String, default: '' },
+  letterGeneratedAt: { type: Date },
   statusHistory: [{
     status: String,
     changedAt: { type: Date, default: Date.now },

@@ -1,0 +1,17 @@
+C:\Users\mohit\Downloads\files\jantavoice\backend\node_modules\groq-sdk\index.js:50
+            throw new Errors.GroqError("The GROQ_API_KEY environment variable is missing or empty; either provide it, or instantiate the Groq client with an apiKey option, like new Groq({ apiKey: 'My API Key' }).");
+            ^
+
+GroqError: The GROQ_API_KEY environment variable is missing or empty; either provide it, or instantiate the Groq client with an apiKey option, like new Groq({ apiKey: 'My API Key' }).
+    at new Groq (C:\Users\mohit\Downloads\files\jantavoice\backend\node_modules\groq-sdk\index.js:50:19)
+    at Object.<anonymous> (C:\Users\mohit\Downloads\files\jantavoice\backend\config\groq.js:3:14)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+
+Node.js v24.13.0

@@ -113,7 +113,7 @@ export default function AdminPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
           {stats ? statCards.map(s => (
             <div key={s.label} className={`bg-white border rounded-2xl p-4 shadow-sm border-l-4 ${s.color.split(' ')[1]}`}>
               <div className="text-2xl mb-1">{s.icon}</div>
@@ -127,6 +127,23 @@ export default function AdminPage() {
               <div className="h-3 w-20 bg-gray-200 rounded" />
             </div>
           ))}
+        </div>
+
+        {/* Feature Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {stats ? [
+            { label: 'Gov Tickets Submitted', val: stats.govTickets, icon: '🏛️' },
+            { label: 'Auto-actions Today', val: stats.autoActionsToday, icon: '🤖' },
+            { label: 'Letters Generated', val: stats.lettersGen, icon: '📄' }
+          ].map(s => (
+            <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm flex items-center gap-3">
+              <div className="text-2xl">{s.icon}</div>
+              <div>
+                <div className="font-bold text-gray-800 text-lg leading-none">{s.val}</div>
+                <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wide mt-1">{s.label}</div>
+              </div>
+            </div>
+          )) : null}
         </div>
 
         {/* Table */}

@@ -32,7 +32,7 @@ Respond ONLY with valid JSON, no extra text.`,
           content: `Title: ${title}\nDescription: ${description}`,
         },
       ],
-      model: process.env.GROQ_MODEL || 'llama3-8b-8192',
+      model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
       temperature: 0.3,
       max_tokens: 200,
     });
@@ -66,7 +66,7 @@ New Status: ${status}
 Write an admin note explaining what action is being taken.`,
         },
       ],
-      model: process.env.GROQ_MODEL || 'llama3-8b-8192',
+      model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
       temperature: 0.5,
       max_tokens: 150,
     });

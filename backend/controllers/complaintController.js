@@ -1,9 +1,12 @@
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const PDFDocument = require('pdfkit');
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
-const { autoCategory, generateAdminNote } = require('../config/groq');
+const GovTicket = require('../models/GovTicket');
+const { groq, autoCategory, generateAdminNote } = require('../config/groq');
 
 // POST /api/complaints
 const createComplaint = async (req, res, next) => {
@@ -180,6 +183,12 @@ const getComplaintById = async (req, res, next) => {
     obj.likesCount = complaint.likes.length;
     obj.isLiked = req.user ? complaint.likes.includes(req.user._id) : false;
 
+    // Attach gov ticket if exists
+    const govTicket = await GovTicket.findOne({ complaint: complaint._id });
+    if (govTicket) {
+      obj.govTicket = govTicket;
+    }
+
     res.json({ success: true, complaint: obj });
   } catch (err) {
     next(err);
@@ -347,6 +356,185 @@ const aiCategorize = async (req, res, next) => {
   }
 };
 
+// POST /api/complaints/transcribe
+const transcribeVoice = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Audio file is required.' });
+    }
+
+    const audioPath = req.file.path;
+
+    const transcription = await groq.audio.transcriptions.create({
+      file: fs.createReadStream(audioPath),
+      model: "whisper-large-v3",
+      language: "hi",
+      response_format: "verbose_json"
+    });
+
+    const transcript = transcription.text;
+
+    // Run transcript through autoCategory
+    let finalCategory = 'Other';
+    let finalPriority = 'Medium';
+    let aiSummary = '';
+
+    const aiResult = await autoCategory(transcript.substring(0, 150), transcript);
+    if (aiResult) {
+      finalCategory = aiResult.category || 'Other';
+      finalPriority = aiResult.priority || 'Medium';
+      aiSummary = aiResult.summary || '';
+    }
+
+    // Delete temp audio file
+    if (fs.existsSync(audioPath)) {
+      fs.unlinkSync(audioPath);
+    }
+
+    res.json({
+      success: true,
+      transcript,
+      category: finalCategory,
+      priority: finalPriority,
+      summary: aiSummary,
+      confidence: transcription.language_probability || 0.9
+    });
+  } catch (err) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    next(err);
+  }
+};
+
+// POST /api/complaints/:id/generate-letter
+const generateComplaintLetter = async (req, res, next) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id).populate('user');
+    if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found.' });
+
+    const isOwner = complaint.user._id.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ success: false, message: 'Not authorized to generate letter.' });
+    }
+
+    const { title, description, category, location } = complaint;
+    const userName = req.body.userName || req.user.name;
+    const userEmail = req.body.userEmail || req.user.email;
+    const additionalDetails = req.body.additionalDetails || 'None';
+
+    const systemPrompt = `You are an expert Indian government document writer. Generate a formal complaint letter in proper Indian government format. The letter must include:
+1. Proper salutation to the concerned government department
+2. Subject line (RE: Formal Complaint Regarding [category])
+3. Reference number placeholder: JV/[YEAR]/[RANDOM_5_DIGITS]
+4. Date in DD/MM/YYYY format
+5. Body paragraphs: introduction, detailed description of issue, impact on citizens, previous actions taken (if any), specific demands/requests
+6. Formal closing with complainant details
+7. CC line to relevant departments
+Use formal English style. Keep it under 400 words.
+Return ONLY a valid JSON object matching exactly this structure: {"letterText": "string", "subject": "string", "referenceNumber": "string", "department": "string", "ccList": "string"}`;
+
+    const userPrompt = `Complaint Details:
+Title: ${title}
+Description: ${description}
+Category: ${category}
+Address: ${location.address}, ${location.city}, ${location.state}
+Complainant Name: ${userName}
+Complainant Email: ${userEmail}
+Additional Details (Previous actions): ${additionalDetails}`;
+
+    const chat = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
+      temperature: 0.2,
+      max_tokens: 1000,
+    });
+
+    let generatedData;
+    let rawText = '';
+    try {
+      rawText = chat.choices[0]?.message?.content?.trim();
+      const jsonStart = rawText.indexOf('{');
+      const jsonEnd = rawText.lastIndexOf('}') + 1;
+
+      if (jsonStart === -1 || jsonEnd === 0) {
+        throw new Error('No JSON brackets found in AI response');
+      }
+
+      const jsonText = rawText.substring(jsonStart, jsonEnd);
+      generatedData = JSON.parse(jsonText);
+    } catch (e) {
+      console.error('AI Letter Gen Error:', e.message);
+      console.error('Raw AI Output:', rawText);
+      return res.status(500).json({ success: false, message: 'Failed to generate proper letter format via AI.', rawError: e.message, rawText });
+    }
+
+    const { letterText, subject, referenceNumber, department, ccList } = generatedData;
+
+    complaint.formalLetter = letterText || 'Sample formal letter text.';
+    complaint.referenceNumber = referenceNumber || `JV/AUTO/${Math.random().toString().slice(2, 8)}`;
+    complaint.letterGeneratedAt = new Date();
+    await complaint.save();
+
+    const safeRef = (complaint.referenceNumber).replace(/[\/\\]/g, '-');
+    const docPath = path.join(os.tmpdir(), `complaint-${complaint._id}-${Date.now()}.pdf`);
+
+    const doc = new PDFDocument({ margin: 50 });
+    const writeStream = fs.createWriteStream(docPath);
+    doc.pipe(writeStream);
+
+    doc.font('Helvetica-Bold').fontSize(16).text('JANTA VOICE COMPLAINT PORTAL', { align: 'center' });
+    doc.moveDown(0.2);
+
+    const startX = 50;
+    const lineY = doc.y;
+    const lineWidth = doc.page.width - 100;
+    doc.rect(startX, lineY, lineWidth, 2).fill('#FF9933');
+    doc.rect(startX, lineY + 2, lineWidth, 2).fill('#138808');
+    doc.moveDown(1.5);
+    doc.fillColor('black');
+
+    doc.font('Helvetica-Bold').fontSize(12).text(`Ref: ${referenceNumber}`, { continued: true });
+    const today = new Date().toLocaleDateString('en-IN');
+    doc.text(`Date: ${today}`, { align: 'right' });
+    doc.moveDown();
+
+    doc.font('Helvetica-Bold').text(`To,`);
+    doc.text(department || 'Concerned Authority');
+    doc.moveDown();
+
+    doc.font('Helvetica-Bold').text(`Subject: ${subject}`);
+    doc.moveDown();
+
+    doc.font('Helvetica').text(letterText, { align: 'justify' });
+    doc.moveDown(2);
+
+    if (ccList) {
+      doc.font('Helvetica-Bold').text('CC:');
+      doc.font('Helvetica').text(ccList);
+    }
+
+    doc.moveDown(3);
+    doc.font('Helvetica-Oblique').fontSize(10).fillColor('gray').text(`Filed via Janta Voice | jantavoice.com | Ref: ${referenceNumber || `JV/AUTO/${Math.random().toString().slice(2, 8)}`}`, { align: 'center', baseline: 'bottom' });
+
+    doc.end();
+
+    writeStream.on('finish', () => {
+      res.download(docPath, `${safeRef}.pdf`, (err) => {
+        if (err) console.error(err);
+        setTimeout(() => { if (fs.existsSync(docPath)) fs.unlinkSync(docPath); }, 60000);
+      });
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createComplaint,
   getAllComplaints,
@@ -358,4 +546,6 @@ module.exports = {
   updateStatus,
   deleteComplaint,
   aiCategorize,
+  transcribeVoice,
+  generateComplaintLetter,
 };

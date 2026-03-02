@@ -97,6 +97,28 @@ export default function LandingPage() {
                 <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
               </div>
             ))}
+
+            {/* NEW FEATURES ROW */}
+            <div className="bg-white border text-center border-gray-200 rounded-2xl p-5 relative hover:border-saffron hover:-translate-y-1 transition-all shadow-sm hover:shadow-md">
+              <div className="font-heading font-bold text-5xl text-saffron/15 absolute top-3 right-4">🎤</div>
+              <div className="text-3xl mb-3">🎤</div>
+              <h3 className="font-heading font-bold text-lg mb-2">Voice Complaints</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Speak in Hindi or English. AI transcribes and files for you.</p>
+            </div>
+
+            <div className="bg-white border text-center border-gray-200 rounded-2xl p-5 relative hover:border-saffron hover:-translate-y-1 transition-all shadow-sm hover:shadow-md">
+              <div className="font-heading font-bold text-5xl text-saffron/15 absolute top-3 right-4">🏛️</div>
+              <div className="text-3xl mb-3">🏛️</div>
+              <h3 className="font-heading font-bold text-lg mb-2">Gov Portal Integration</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Auto-submit to CPGRAMS and track official ticket status live.</p>
+            </div>
+
+            <div className="bg-white border text-center border-gray-200 rounded-2xl p-5 relative hover:border-saffron hover:-translate-y-1 transition-all shadow-sm hover:shadow-md">
+              <div className="font-heading font-bold text-5xl text-saffron/15 absolute top-3 right-4">🤖</div>
+              <div className="text-3xl mb-3">🤖</div>
+              <h3 className="font-heading font-bold text-lg mb-2">Smart Automation</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">AI auto-escalates, follows up, and updates you without any manual work.</p>
+            </div>
           </div>
         </div>
       </section>

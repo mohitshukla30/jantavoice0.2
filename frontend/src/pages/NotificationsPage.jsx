@@ -16,7 +16,7 @@ export default function NotificationsPage() {
       try {
         const { data } = await notifAPI.getAll();
         setNotifs(data.notifications);
-      } catch {} finally { setLoading(false); }
+      } catch { } finally { setLoading(false); }
     };
     fetch();
   }, [isAuthenticated]);
@@ -49,9 +49,12 @@ export default function NotificationsPage() {
           <div className="space-y-2">
             {notifs.map(n => (
               <div key={n._id} className={`bg-white border rounded-xl p-4 flex gap-3 items-start transition-colors ${!n.isRead ? 'border-saffron/30 bg-saffron-pale/20' : 'border-gray-200'}`}>
-                <span className="text-xl flex-shrink-0">{TYPE_ICONS[n.type] || '🔔'}</span>
+                <span className="text-xl flex-shrink-0">{n.type === 'system' ? '🤖' : (TYPE_ICONS[n.type] || '🔔')}</span>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm ${!n.isRead ? 'font-bold text-gray-800' : 'text-gray-600'}`}>{n.message}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    {n.type === 'system' && <span className="bg-gray-800 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Auto</span>}
+                    <p className={`text-sm ${!n.isRead ? 'font-bold text-gray-800' : 'text-gray-600'}`}>{n.message}</p>
+                  </div>
                   {n.complaint && (
                     <Link to={`/complaint/${n.complaint._id || n.complaint}`} className="text-xs text-saffron-dark font-bold hover:underline mt-1 block">
                       View Complaint →

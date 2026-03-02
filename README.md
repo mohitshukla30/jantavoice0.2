@@ -50,8 +50,37 @@ Frontend runs at: `http://localhost:5173`
 
 ---
 
-## 🤖 Groq AI Features
+## 🤖 Groq AI## Features
 
+### New Features (v2.0)
+
+### 🎤 Voice Complaints
+- Record complaint in Hindi or English
+- Whisper AI transcribes automatically
+- AI auto-detects category and priority
+
+### 📄 Formal Letter Generator
+- AI writes official government-format letter
+- Download as PDF
+- Share via WhatsApp or Email
+- Reference number generated (JV/YEAR/XXXXX)
+
+### 🏛️ Government Portal Integration
+- Auto-submit to CPGRAMS, Maharashtra Aaple Sarkar, Delhi CM Helpline
+- Live ticket tracking every 4 hours
+- Manual ticket ID entry for existing complaints
+
+### 🤖 Automation Engine
+- 6 default automation rules active
+- Auto-escalate critical complaints
+- Auto-submit high-engagement complaints to government
+- AI-generated empathetic status updates
+- Admin can create custom rules
+
+---
+
+### Core Features (v1.0)
+- **AI-Powered Filing:** Simply type what happened; the AI extracts context, classifies the category, detects location, and assesses priority.
 - **Auto-categorization**: On report form, click "🤖 Auto-detect with AI" to instantly classify category + priority
 - **AI Admin Notes**: In admin panel, click "🤖 AI" to generate a professional response note per complaint
 

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { complaintAPI } from '../services/api';
+import { complaintAPI, govAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import StatusTimeline from '../components/StatusTimeline';
+import ComplaintLetterGenerator from '../components/ComplaintLetterGenerator';
+import GovStatusBadge from '../components/GovStatusBadge';
 import { CATEGORY_ICONS, STATUS_COLORS, timeAgo, formatDate, getInitials } from '../utils/helpers';
-import { FaHeart, FaRegHeart, FaArrowLeft, FaTrash } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaArrowLeft, FaTrash, FaBuilding, FaExternalLinkAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 export default function ComplaintDetailPage() {
@@ -18,6 +20,7 @@ export default function ComplaintDetailPage() {
   const [comment, setComment] = useState('');
   const [commenting, setCommenting] = useState(false);
   const [imgIdx, setImgIdx] = useState(0);
+  const [showLetterGen, setShowLetterGen] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -61,6 +64,13 @@ export default function ComplaintDetailPage() {
       toast.success('Complaint deleted');
       navigate('/my-complaints');
     } catch { toast.error('Cannot delete'); }
+  };
+
+  const handleLetterGenerated = async () => {
+    try {
+      const { data } = await complaintAPI.getById(id);
+      setComplaint(data.complaint);
+    } catch { }
   };
 
   if (loading) return (
@@ -212,6 +222,80 @@ export default function ComplaintDetailPage() {
               )}
               <p className="text-xs text-gray-400 mt-3">📅 Filed {formatDate(complaint.createdAt)}</p>
             </div>
+
+            {(isOwner || isAdmin) && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-4">
+                <h4 className="font-heading font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Gov Integration</h4>
+                {complaint.govTicket ? (
+                  <div className="space-y-3">
+                    <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl flex items-center justify-between">
+                      <div className="text-xs text-blue-800 font-bold">
+                        <FaBuilding className="inline mr-1" /> {complaint.govTicket.portalName}
+                      </div>
+                      <a href={complaint.govTicket.ticketUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800"><FaExternalLinkAlt className="text-xs" /></a>
+                    </div>
+                    <div className="text-sm font-semibold text-gray-700">Ticket #: {complaint.govTicket.ticketId}</div>
+                    <GovStatusBadge status={complaint.govTicket.currentStatus} />
+                    <Link to="/gov-tracking" className="btn-secondary w-full text-center text-xs py-2 block">Track Details</Link>
+                  </div>
+                ) : (
+                  <Link to="/gov-tracking" className="btn-primary w-full text-center text-sm py-2 flex justify-center items-center gap-2">
+                    <FaBuilding /> Submit to Gov Portal
+                  </Link>
+                )}
+              </div>
+            )}
+
+            {(isOwner || isAdmin) && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-4">
+                <h4 className="font-heading font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Formal Document</h4>
+                {complaint.referenceNumber ? (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm font-bold text-gray-800">Ref: {complaint.referenceNumber}</p>
+                    <button onClick={() => setShowLetterGen(true)} className="btn-secondary w-full text-center text-sm py-2 flex items-center justify-center gap-2">
+                      📄 View Letter
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowLetterGen(true)} className="btn-primary w-full text-center text-sm py-2 flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 border-none">
+                    📄 Generate Letter
+                  </button>
+                )}
+              </div>
+            )}
+
+            {(isOwner || isAdmin) && (
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 text-white border border-gray-700 rounded-2xl p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-3 opacity-10 text-6xl">🤖</div>
+                <h4 className="font-heading font-bold text-sm uppercase tracking-wide text-gray-400 mb-3 relative z-10 flex items-center gap-2">
+                  Automation
+                </h4>
+                <div className="space-y-2 text-xs relative z-10">
+                  <div className="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                    <span className="text-gray-400">Auto-submit:</span>
+                    <span className={complaint.govTicket ? "text-green-400 font-bold" : "text-amber-400 font-bold"}>
+                      {complaint.govTicket ? 'Completed' : 'Pending'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                    <span className="text-gray-400">Formal Letter:</span>
+                    <span className={complaint.referenceNumber ? "text-green-400 font-bold" : "text-gray-500 font-bold"}>
+                      {complaint.referenceNumber ? 'Generated' : 'Not yet'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+                    <span className="text-gray-400">Auto-escalation:</span>
+                    <span className={complaint.priority === 'Critical' ? "text-red-400 font-bold" : "text-green-400 font-bold"}>
+                      {complaint.statusHistory?.some(h => h.source === 'automation' && h.details?.includes('Escalate')) || complaint.priority === 'Critical' ? 'Active' : 'Monitoring'}
+                    </span>
+                  </div>
+                  <div className="text-center pt-2 text-gray-500 font-mono text-[10px]">
+                    System checks every 30m
+                  </div>
+                </div>
+              </div>
+            )}
+
             {isAdmin && (
               <div className="bg-white border border-gray-200 rounded-2xl p-4">
                 <h4 className="font-heading font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Admin Actions</h4>
@@ -221,6 +305,13 @@ export default function ComplaintDetailPage() {
           </div>
         </div>
       </div>
+
+      <ComplaintLetterGenerator
+        isOpen={showLetterGen}
+        onClose={() => setShowLetterGen(false)}
+        complaint={complaint}
+        onGenerated={handleLetterGenerated}
+      />
     </div>
   );
 }

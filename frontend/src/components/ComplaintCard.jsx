@@ -41,6 +41,10 @@ export default function ComplaintCard({ complaint, onLikeUpdate }) {
             <span className="bg-saffron-pale text-saffron-dark text-xs font-bold px-2 py-1 rounded-full">
               {icon} {complaint.category}
             </span>
+            {complaint.govTicket && <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full" title="Gov Ticket Active">🏛️</span>}
+            {complaint.statusHistory?.some(h => h.source === 'automation' && h.details?.includes('Escalate')) && (
+              <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1">🤖 Auto-escalated</span>
+            )}
           </div>
           {(complaint.likesCount > 20 || likesCount > 20) && (
             <span className="bg-gradient-to-r from-saffron to-yellow-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">🔥 Trending</span>

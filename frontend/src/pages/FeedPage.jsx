@@ -107,16 +107,31 @@ export default function FeedPage() {
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${
-                  (cat === 'All' && !filters.category) || filters.category === cat
+                className={`px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${(cat === 'All' && !filters.category) || filters.category === cat
                     ? 'bg-saffron border-saffron text-white'
                     : 'border-gray-200 text-gray-500 hover:border-saffron hover:text-saffron'
-                }`}
+                  }`}
               >
                 {cat !== 'All' ? `${CATEGORY_ICONS[cat]} ` : ''}{cat}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="flex gap-3 overflow-x-auto pb-4 mb-2 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar ext-gray-700">
+          <Link to="/report?tab=voice" className="flex-shrink-0 bg-white border border-gray-200 hover:border-saffron hover:text-saffron-dark px-4 py-2.5 rounded-xl shadow-sm transition-all font-bold text-sm flex items-center gap-2">
+            🎤 Voice Complaint
+          </Link>
+          <Link to="/my-complaints" className="flex-shrink-0 bg-white border border-gray-200 hover:border-saffron hover:text-saffron-dark px-4 py-2.5 rounded-xl shadow-sm transition-all font-bold text-sm flex items-center gap-2">
+            📄 Generate Letter
+          </Link>
+          <Link to="/gov-tracking" className="flex-shrink-0 bg-white border border-gray-200 hover:border-saffron hover:text-saffron-dark px-4 py-2.5 rounded-xl shadow-sm transition-all font-bold text-sm flex items-center gap-2">
+            🏛️ Gov Tracker
+          </Link>
+          <button onClick={() => toast.success('Alerts configured!')} className="flex-shrink-0 bg-white border border-gray-200 hover:border-saffron hover:text-saffron-dark px-4 py-2.5 rounded-xl shadow-sm transition-all font-bold text-sm flex items-center gap-2">
+            🔔 Set Alert
+          </button>
         </div>
 
         {/* Grid */}

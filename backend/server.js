@@ -13,6 +13,8 @@ const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const complaintRoutes = require('./routes/complaintRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const govPortalRoutes = require('./routes/govPortalRoutes');
+const automationRoutes = require('./routes/automationRoutes');
 
 const app = express();
 
@@ -51,6 +53,8 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/gov', govPortalRoutes);
+app.use('/api/automation', automationRoutes);
 
 // 404
 app.use('*', (req, res) => {
@@ -71,5 +75,14 @@ app.listen(PORT, () => {
   ╚═══════════════════════════════════════╝
   `);
 });
+
+// Start background engines
+const { startAutomationEngine } = require('./controllers/automationController');
+const { startGovCheckCron } = require('./controllers/govPortalController');
+
+if (process.env.AUTO_CHECK_ENABLED === 'true') {
+  startAutomationEngine();
+  startGovCheckCron();
+}
 
 module.exports = app;

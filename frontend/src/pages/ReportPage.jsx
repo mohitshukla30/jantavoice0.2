@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { complaintAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import VoiceRecorder from '../components/VoiceRecorder';
 import { STATES } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
@@ -19,6 +20,7 @@ export default function ReportPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [inputMode, setInputMode] = useState('manual');
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
 
@@ -27,9 +29,18 @@ export default function ReportPage() {
     address: '', city: '', state: '', pincode: '', isAnonymous: false,
   });
 
+  const location = useLocation();
+
   useEffect(() => {
     if (!isAuthenticated) { navigate('/login', { state: { from: { pathname: '/report' } } }); }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('tab') === 'voice') {
+      setInputMode('voice');
+    }
+  }, [location]);
 
   const handleAI = async () => {
     if (!form.title || !form.description) { toast.error('Enter title and description first'); return; }
@@ -74,6 +85,18 @@ export default function ReportPage() {
       reader.onload = ev => setPreviews(prev => [...prev, ev.target.result].slice(0, 3));
       reader.readAsDataURL(f);
     });
+  };
+
+  const handleUseComplaint = (data) => {
+    setForm(f => ({
+      ...f,
+      title: data.title,
+      description: data.description,
+      category: data.category || f.category,
+      priority: data.priority || f.priority,
+    }));
+    setInputMode('manual');
+    toast.success('Complaint details filled! You can review and proceed.');
   };
 
   const removeImage = (idx) => {
@@ -143,48 +166,71 @@ export default function ReportPage() {
           {/* STEP 1 */}
           {step === 1 && (
             <>
-              <div className="p-5 border-b border-gray-100 flex items-center gap-3">
-                <div className="w-10 h-10 bg-saffron-pale rounded-xl flex items-center justify-center text-xl">📋</div>
-                <div><h2 className="font-heading font-bold text-xl">Basic Information</h2><p className="text-xs text-gray-400">What is the issue?</p></div>
+              <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-saffron-pale rounded-xl flex items-center justify-center text-xl">📋</div>
+                  <div><h2 className="font-heading font-bold text-xl">Basic Information</h2><p className="text-xs text-gray-400">What is the issue?</p></div>
+                </div>
+
+                <div className="flex bg-gray-100 p-1 rounded-lg self-start md:self-auto">
+                  <button
+                    onClick={() => setInputMode('manual')}
+                    className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${inputMode === 'manual' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    ✍️ Type Manually
+                  </button>
+                  <button
+                    onClick={() => setInputMode('voice')}
+                    className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${inputMode === 'voice' ? 'bg-white text-saffron-dark shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    🎤 Voice Input
+                  </button>
+                </div>
               </div>
               <div className="p-5 space-y-4">
-                <div>
-                  <label className="label">Issue Title * <span className="text-gray-400 font-normal text-xs">({form.title.length}/150)</span></label>
-                  <input className="input" maxLength={150} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Pothole on main road causing accidents" />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="label m-0">Category *</label>
-                    <button onClick={handleAI} disabled={aiLoading} className="text-xs font-bold text-saffron-dark bg-saffron-pale px-3 py-1 rounded-lg hover:bg-saffron/20 transition-colors flex items-center gap-1 disabled:opacity-60">
-                      {aiLoading ? '⏳ Detecting...' : '🤖 Auto-detect with AI'}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {CATEGORIES.map(cat => (
-                      <button key={cat} onClick={() => setForm(f => ({ ...f, category: cat }))}
-                        className={`p-2.5 rounded-xl border-2 text-center transition-all text-xs font-bold
+                {inputMode === 'voice' ? (
+                  <VoiceRecorder onUseComplaint={handleUseComplaint} />
+                ) : (
+                  <>
+                    <div>
+                      <label className="label">Issue Title * <span className="text-gray-400 font-normal text-xs">({form.title.length}/150)</span></label>
+                      <input className="input" maxLength={150} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Pothole on main road causing accidents" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="label m-0">Category *</label>
+                        <button onClick={handleAI} disabled={aiLoading} className="text-xs font-bold text-saffron-dark bg-saffron-pale px-3 py-1 rounded-lg hover:bg-saffron/20 transition-colors flex items-center gap-1 disabled:opacity-60">
+                          {aiLoading ? '⏳ Detecting...' : '🤖 Auto-detect with AI'}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {CATEGORIES.map(cat => (
+                          <button key={cat} onClick={() => setForm(f => ({ ...f, category: cat }))}
+                            className={`p-2.5 rounded-xl border-2 text-center transition-all text-xs font-bold
                           ${form.category === cat ? 'border-saffron bg-saffron-pale text-saffron-dark' : 'border-gray-200 text-gray-500 hover:border-saffron/40'}`}>
-                        <div className="text-xl mb-0.5">{['🛣️', '💧', '⚡', '🗑️', '🌳', '🛡️', '🔊', '📋'][CATEGORIES.indexOf(cat)]}</div>
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="label">Description * <span className="text-gray-400 font-normal text-xs">({form.description.length}/2000)</span></label>
-                  <textarea className="input min-h-[120px]" maxLength={2000} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the issue in detail. Include how long it has been there, who is affected, any safety concerns." />
-                </div>
-                <div>
-                  <label className="label">Priority</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {PRIORITIES.map(p => (
-                      <button key={p.val} onClick={() => setForm(f => ({ ...f, priority: p.val }))}
-                        className={`p-2.5 rounded-xl border-2 text-center text-xs font-bold transition-all ${form.priority === p.val ? p.color + ' border-2 scale-105 shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                        <div className="text-lg mb-0.5">{p.icon}</div>{p.val}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                            <div className="text-xl mb-0.5">{['🛣️', '💧', '⚡', '🗑️', '🌳', '🛡️', '🔊', '📋'][CATEGORIES.indexOf(cat)]}</div>
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="label">Description * <span className="text-gray-400 font-normal text-xs">({form.description.length}/2000)</span></label>
+                      <textarea className="input min-h-[120px]" maxLength={2000} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the issue in detail. Include how long it has been there, who is affected, any safety concerns." />
+                    </div>
+                    <div>
+                      <label className="label">Priority</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {PRIORITIES.map(p => (
+                          <button key={p.val} onClick={() => setForm(f => ({ ...f, priority: p.val }))}
+                            className={`p-2.5 rounded-xl border-2 text-center text-xs font-bold transition-all ${form.priority === p.val ? p.color + ' border-2 scale-105 shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                            <div className="text-lg mb-0.5">{p.icon}</div>{p.val}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           )}

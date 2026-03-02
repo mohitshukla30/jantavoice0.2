@@ -25,6 +25,8 @@ export default function Navbar({ unread = 0 }) {
           <div className="hidden md:flex items-center gap-1">
             <NavLink to="/feed" className={({ isActive }) => isActive ? navLinkActive : navLink}>Feed</NavLink>
             {isAuthenticated && <NavLink to="/my-complaints" className={({ isActive }) => isActive ? navLinkActive : navLink}>My Complaints</NavLink>}
+            {isAuthenticated && <NavLink to="/gov-tracking" className={({ isActive }) => isActive ? navLinkActive : navLink}>🏛️ Gov Track</NavLink>}
+            {isAuthenticated && <NavLink to="/report?tab=voice" className={({ isActive }) => isActive ? navLinkActive : navLink}>🎤 Voice Report</NavLink>}
             {user?.role === 'admin' && <NavLink to="/admin" className={({ isActive }) => isActive ? navLinkActive : navLink}>Admin Panel</NavLink>}
           </div>
 
@@ -67,6 +69,8 @@ export default function Navbar({ unread = 0 }) {
           <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col gap-2">
             <NavLink to="/feed" onClick={() => setMobileOpen(false)} className="text-sm font-semibold text-gray-700 py-2">Feed</NavLink>
             {isAuthenticated && <NavLink to="/my-complaints" onClick={() => setMobileOpen(false)} className="text-sm font-semibold text-gray-700 py-2">My Complaints</NavLink>}
+            {isAuthenticated && <NavLink to="/gov-tracking" onClick={() => setMobileOpen(false)} className="text-sm font-semibold text-gray-700 py-2">🏛️ Gov Track</NavLink>}
+            {isAuthenticated && <NavLink to="/report?tab=voice" onClick={() => setMobileOpen(false)} className="text-sm font-semibold text-gray-700 py-2">🎤 Voice Report</NavLink>}
             {user?.role === 'admin' && <NavLink to="/admin" onClick={() => setMobileOpen(false)} className="text-sm font-semibold text-gray-700 py-2">Admin Panel</NavLink>}
             <Link to="/report" onClick={() => setMobileOpen(false)} className="btn-primary text-center mt-1">+ Report Issue</Link>
           </div>
