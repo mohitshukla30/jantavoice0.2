@@ -46,4 +46,10 @@ router.put('/:id/status', protect, adminOnly, updateStatus);
 router.get('/:id/generate-letter', protect, generateFormalLetter);
 router.delete('/:id', protect, deleteComplaint);
 
+const fakeDetector = require('../middleware/fakeDetector');
+
+// Add these NEW routes only:
+router.post('/quick-file', protect, fakeDetector, quickFile);
+router.post('/ai-categorize', protect, aiCategorize);
+router.get('/:id/letter', protect, generateFormalLetter);
 module.exports = router;

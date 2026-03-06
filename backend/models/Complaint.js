@@ -49,6 +49,22 @@ const complaintSchema = new mongoose.Schema({
   adminNote: { type: String, default: '', maxlength: 500 },
   aiSummary: { type: String, default: '' },
   views: { type: Number, default: 0 },
+  rawInput: { type: String },
+  aiFormatted: {
+    issueType: String,
+    department: String,
+    priority: String,
+    location: String,
+    summary: String
+  },
+  department: { type: String },
+  escalationLevel: { type: Number, default: 0 },
+  nextEscalationAt: Date,
+  isFake: { type: Boolean, default: false },
+  fakeScore: { type: Number, default: 0 },
+  isVerified: { type: Boolean, default: false },
+  govTicketId: { type: String },
+  callLogId: { type: mongoose.Schema.Types.ObjectId, ref: 'CallLog' },
   formalLetter: { type: String, default: '' },
   referenceNumber: { type: String, default: '' },
   letterGeneratedAt: { type: Date },
@@ -57,6 +73,7 @@ const complaintSchema = new mongoose.Schema({
     changedAt: { type: Date, default: Date.now },
     changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     note: String,
+    isAutomated: { type: Boolean, default: false }
   }],
 }, { timestamps: true });
 

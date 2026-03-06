@@ -729,6 +729,107 @@ Return ONLY valid JSON without markdown wrapping.`;
   }
 };
 
+const _aiCategorize = async (req, res) => {
+  try {
+    const { analyzeComplaint } = require('../services/groqService');
+    const { text } = req.body;
+    const ai = await analyzeComplaint(text);
+    res.json({ success: true, category: ai.category, priority: ai.priority, department: ai.department, title: ai.title, tags: ai.tags });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const _generateComplaintLetter = async (req, res) => {
+  try {
+    const { generateLetter } = require('../services/groqService');
+    const complaint = await Complaint.findById(req.params.id).populate('user', 'name email');
+    if (!complaint) return res.status(404).json({ success: false, message: 'Complaint not found' });
+    if (String(complaint.user._id) !== String(req.user._id) && req.user.role !== 'admin')
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+
+    const letterText = await generateLetter(complaint, complaint.user.name);
+    const refNum = 'JV/' + new Date().getFullYear() + '/' + Math.floor(Math.random() * 90000 + 10000);
+    await Complaint.findByIdAndUpdate(req.params.id, { formalLetter: letterText, referenceNumber: refNum });
+
+    const doc = new PDFDocument({ margin: 65, size: 'A4' });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="JantaVoice-${refNum.replace(/\//g, '-')}.pdf"`);
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(8).fillColor('#888').text('JANTA VOICE — CIVIC COMPLAINT PORTAL', { align: 'center' });
+    doc.moveDown(0.3);
+    const y = doc.y;
+    doc.rect(65, y, 155, 3).fill('#FF9933');
+    doc.rect(220, y, 155, 3).fill('#DDDDDD');
+    doc.rect(375, y, 155, 3).fill('#138808');
+    doc.moveDown(1);
+    doc.fontSize(9).fillColor('#555').text(`Ref: ${refNum}`, { align: 'right' });
+    doc.text(`Date: ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}`, { align: 'right' });
+    doc.moveDown(1);
+
+    letterText.split('\n').forEach(line => {
+      if (!line.trim()) { doc.moveDown(0.4); return; }
+      const isBold = line.trim().startsWith('To,') || line.trim().startsWith('Subject:') || line.trim().startsWith('CC:');
+      doc[isBold ? 'font' : 'font'](isBold ? 'Helvetica-Bold' : 'Helvetica')
+        .fontSize(11).fillColor('#1A1A1A').text(line.trim(), { align: 'justify', lineGap: 3 });
+    });
+
+    doc.fontSize(7).fillColor('#aaa').text(`Filed via JantaVoice | Ref: ${refNum} | ID: ${complaint.complaintId || complaint._id}`, 65, 750, { align: 'center' });
+    doc.end();
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const _quickFile = async (req, res) => {
+  try {
+    const { analyzeComplaint } = require('../services/groqService');
+    const { DEPARTMENT_MAP } = require('../config/constants');
+    const { text, location } = req.body;
+    if (!text || text.trim().length < 5)
+      return res.status(400).json({ success: false, message: 'Please describe the issue.' });
+
+    const ai = await analyzeComplaint(text, location || '');
+    const dept = DEPARTMENT_MAP[ai.category] || DEPARTMENT_MAP.Other;
+    const complaintId = 'JV/' + new Date().getFullYear() + '/' + Math.floor(Math.random() * 90000 + 10000);
+
+    const complaint = await Complaint.create({
+      complaintId,
+      title: ai.title,
+      description: ai.description,
+      rawInput: text,
+      aiFormatted: { issueType: ai.issueType, department: dept.name, priority: ai.priority, location: ai.location, summary: ai.description },
+      category: ai.category,
+      department: dept.name,
+      location: { address: ai.location || location || '', city: ai.city || '', state: ai.state || '' },
+      status: 'Submitted',
+      priority: ai.priority,
+      tags: ai.tags || [],
+      user: req.user._id,
+      isFake: req.fakeResult?.isFake || false,
+      fakeScore: req.fakeResult?.fakeScore || 0,
+      statusHistory: [{ status: 'Submitted', changedAt: new Date(), note: 'Quick-filed via AI', isAutomated: true }],
+      nextEscalationAt: new Date(Date.now() + 3 * 86400000)
+    });
+
+    // Create notification
+    if (Notification) {
+      await Notification.create({
+        user: req.user._id,
+        complaint: complaint._id,
+        type: 'submission',
+        message: `⚡ AI filed your complaint: "${complaint.title}" — ID: ${complaintId}`
+      });
+    }
+
+    res.status(201).json({ success: true, complaint, aiResult: ai });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 module.exports = {
   createComplaint,
   getAllComplaints,
@@ -739,9 +840,9 @@ module.exports = {
   addComment,
   updateStatus,
   deleteComplaint,
-  aiCategorize,
+  aiCategorize: _aiCategorize,
   transcribeVoice,
-  generateFormalLetter,
-  quickFile,
+  generateFormalLetter: _generateComplaintLetter,
+  quickFile: _quickFile,
   extractDetails,
 };

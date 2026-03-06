@@ -113,13 +113,13 @@ export default function ComplaintDetailPage() {
             {/* Image carousel or fallback */}
             {complaint.images?.length > 0 ? (
               <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                <img src={`http://localhost:5000${complaint.images[imgIdx]}`} alt="Complaint" className="w-full h-64 object-cover bg-gray-100" />
+                <img src={`https://jantavoice0-2.onrender.com${complaint.images[imgIdx]}`} alt="Complaint" className="w-full h-64 object-cover bg-gray-100" />
                 {complaint.images.length > 1 && (
                   <div className="flex gap-2 p-3 bg-gray-50 border-t border-gray-100">
                     {complaint.images.map((img, i) => (
                       <button key={i} onClick={() => setImgIdx(i)}
                         className={`w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${i === imgIdx ? 'border-saffron ring-2 ring-saffron/20' : 'border-gray-200 hover:border-saffron/50'}`}>
-                        <img src={`http://localhost:5000${img}`} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover bg-gray-100" />
+                        <img src={`https://jantavoice0-2.onrender.com${img}`} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover bg-gray-100" />
                       </button>
                     ))}
                   </div>

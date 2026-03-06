@@ -79,11 +79,20 @@ app.listen(PORT, () => {
 });
 
 // Start background services
+// Gov Portal routes
+app.use('/api/gov', require('./routes/govPortalRoutes'));
+
+// Start background services
 const { startAutomationEngine } = require('./controllers/automationController');
 const { startGovCheckCron } = require('./controllers/govPortalController');
+const { startEscalationChecker } = require('./services/escalationService');
 
 startAutomationEngine();    // runs every 30 min
-startGovCheckCron();        // runs every 4 hours
+
+if (process.env.AUTO_CHECK_ENABLED === 'true') {
+  startGovCheckCron();
+  startEscalationChecker();
+}
 
 console.log('');
 console.log('🚀 Janta Voice Server Running');

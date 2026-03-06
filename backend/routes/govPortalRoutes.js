@@ -1,17 +1,11 @@
-const router = require('express').Router();
-const {
-    submitToPortal,
-    checkTicketStatus,
-    getMyGovTickets,
-    manualTrack,
-    getAllGovTickets
-} = require('../controllers/govPortalController');
-const { protect, adminOnly } = require('../middleware/auth');
+const express = require('express');
+const router = express.Router();
+const ctrl = require('../controllers/govPortalController');
+const { protect } = require('../middleware/auth');
 
-router.post('/submit/:complaintId', protect, submitToPortal);
-router.get('/status/:ticketId', protect, checkTicketStatus);
-router.get('/my-tickets', protect, getMyGovTickets);
-router.post('/track-manual', protect, manualTrack);
-router.get('/admin/tickets', protect, adminOnly, getAllGovTickets);
+router.post('/submit/:id', protect, ctrl.submitToPortal);
+router.get('/status/:id', protect, ctrl.checkStatus);
+router.get('/my-tickets', protect, ctrl.getMyTickets);
+router.post('/track-manual', protect, ctrl.trackManual);
 
 module.exports = router;

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
+import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
 
 import LandingPage from './pages/LandingPage';
@@ -48,7 +49,7 @@ function AppContent() {
   const hideSidebar = ['/login', '/register'].includes(location.pathname);
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen font-body text-gray-800">
+    <div className="min-h-screen font-body text-gray-800" style={{ position: 'relative', zIndex: 1 }}>
       <Navbar />
 
       <div className="flex pt-[60px]">
@@ -96,6 +97,7 @@ export default function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
+        <AnimatedBackground />
         <BrowserRouter>
           <AppContent />
           <Toaster

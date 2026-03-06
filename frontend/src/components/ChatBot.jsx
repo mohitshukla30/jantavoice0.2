@@ -61,7 +61,7 @@ export default function ChatBot({ openReport }) {
         const newHistory = [...conversationHistory, { role: 'user', content: text }];
 
         try {
-            const res = await fetch('http://localhost:5000/api/chatbot/chat', {
+            const res = await fetch('https://jantavoice0-2.onrender.com/api/chatbot/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: text, conversationHistory: newHistory })
@@ -148,8 +148,8 @@ export default function ChatBot({ openReport }) {
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                                 <div className={`max-w-[85%] p-3 text-[14px] leading-relaxed relative ${msg.role === 'user'
-                                        ? 'bg-gradient-to-br from-saffron to-orange-500 text-white rounded-2xl rounded-tr-sm shadow-md'
-                                        : 'bg-white text-gray-700 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100'
+                                    ? 'bg-gradient-to-br from-saffron to-orange-500 text-white rounded-2xl rounded-tr-sm shadow-md'
+                                    : 'bg-white text-gray-700 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100'
                                     }`}>
                                     <p className="whitespace-pre-wrap">{msg.text}</p>
                                     <span className={`text-[9px] mt-1 block w-full ${msg.role === 'user' ? 'text-white/70 text-right' : 'text-gray-400'}`}>

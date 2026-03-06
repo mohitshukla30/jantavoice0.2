@@ -45,6 +45,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Privacy-first — add to existing User schema:
+  loginHistory: [{
+    loginAt: Date,
+    logoutAt: Date,
+    ip: String
+  }],
+  warnings: { type: Number, default: 0 },
+  isSuspended: { type: Boolean, default: false },
+  // Add comment: "PRIVACY POLICY: Do NOT add Aadhaar, govt ID, or sensitive fields"
 }, { timestamps: true });
 
 // Hash password before save
