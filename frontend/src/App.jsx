@@ -92,9 +92,8 @@ function AppContent() {
       </div>
 
       {/* Global Widgets */}
-      <ChatBot />
-      <AQIWidget />
-      <VoiceFAB />
+      <ChatBot onOpenReport={() => window.location.href = '/report?tab=voice'} />
+      <AQIWidget onReportPollution={() => window.location.href = '/report?tab=quick'} />
     </div>
   );
 }

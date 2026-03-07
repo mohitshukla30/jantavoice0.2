@@ -26,6 +26,7 @@ Analyze this citizen complaint. Return ONLY valid JSON, no extra text:
 Complaint: "${rawText}"
 Location hint: "${locationHint}"
 
+Output JSON Format Strict Requirement:
 {
   "title": "clean concise title under 100 chars",
   "description": "professional expanded 2-3 sentence description",

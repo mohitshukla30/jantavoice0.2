@@ -1,133 +1,67 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
-const AnimatedBackground = () => {
-    const canvasRef = useRef(null);
-
+export default function AnimatedBackground() {
+    const ref = useRef(null);
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+        const canvas = ref.current;
         const ctx = canvas.getContext('2d');
-        let animationFrameId;
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        let angle = 0, raf;
+        window.addEventListener('resize', () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; });
 
-        let width = window.innerWidth;
-        let height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-
-        const handleResize = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-        };
-        window.addEventListener('resize', handleResize);
-
-        // Particles
-        const particles = Array.from({ length: 20 }, (_, i) => ({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            size: Math.random() * 4 + 1,
-            speedY: -(Math.random() * 0.8 + 0.2),
-            speedX: (Math.random() - 0.5) * 0.5,
-            color: i % 2 === 0 ? 'rgba(255, 153, 51, 0.4)' : 'rgba(19, 136, 8, 0.3)',
+        const chakras = [
+            { x: 0.78, y: 0.25, r: 140, speed: 0.003, alpha: 0.045 },
+            { x: 0.08, y: 0.72, r: 80, speed: -0.005, alpha: 0.030 },
+            { x: 0.52, y: 0.88, r: 55, speed: 0.008, alpha: 0.022 }
+        ];
+        const orbs = Array.from({ length: 6 }, (_, i) => ({
+            x: Math.random() * W, y: Math.random() * H, r: 80 + Math.random() * 120,
+            dx: (Math.random() - .5) * .3, dy: (Math.random() - .5) * .3,
+            isOrange: i % 2 === 0, op: 0.03 + Math.random() * 0.04
+        }));
+        const particles = Array.from({ length: 22 }, () => ({
+            x: Math.random() * W, y: H + Math.random() * H,
+            r: 2 + Math.random() * 3, speed: .4 + Math.random() * .7,
+            isOrange: Math.random() > .5, op: .12 + Math.random() * .2, a: Math.random() * Math.PI * 2, as: (Math.random() - .5) * .01
         }));
 
-        // Orbs
-        const orbs = [
-            { x: width * 0.2, y: height * 0.2, r: 400, color: 'rgba(255,153,51,0.04)', dx: 0.3, dy: 0.2 },
-            { x: width * 0.8, y: height * 0.8, r: 500, color: 'rgba(19,136,8,0.03)', dx: -0.2, dy: -0.3 },
-            { x: width * 0.5, y: height * 0.5, r: 350, color: 'rgba(255,153,51,0.02)', dx: -0.1, dy: 0.4 },
-        ];
-
-        let rotationInfo = 0;
-
-        const drawAshokaChakra = (x, y, radius, rotation, opacity = 0.05) => {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(rotation);
-            ctx.strokeStyle = `rgba(0, 0, 128, ${opacity})`;
-            ctx.lineWidth = radius * 0.04;
-
-            // Outer rim
-            ctx.beginPath();
-            ctx.arc(0, 0, radius, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // 24 Spokes
+        function drawChakra(cx, cy, r, rot, alpha) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.translate(cx, cy); ctx.rotate(rot);
+            ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.strokeStyle = '#FF9933'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, 0, r * .74, 0, Math.PI * 2); ctx.strokeStyle = '#138808'; ctx.lineWidth = .8; ctx.stroke();
             for (let i = 0; i < 24; i++) {
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(0, -radius);
-                ctx.stroke();
-                ctx.rotate((Math.PI * 2) / 24);
+                const a = (i / 24) * Math.PI * 2;
+                ctx.beginPath(); ctx.moveTo(Math.cos(a) * r * .14, Math.sin(a) * r * .14); ctx.lineTo(Math.cos(a) * r * .71, Math.sin(a) * r * .71);
+                ctx.strokeStyle = i % 3 === 0 ? '#FF9933' : '#138808'; ctx.lineWidth = i % 6 === 0 ? 1.1 : .55; ctx.stroke();
             }
+            ctx.beginPath(); ctx.arc(0, 0, r * .07, 0, Math.PI * 2); ctx.fillStyle = '#FF9933'; ctx.fill();
             ctx.restore();
-        };
+        }
 
-        const draw = () => {
-            ctx.clearRect(0, 0, width, height);
-            rotationInfo += 0.002;
-
-            // Draw Orbs
-            orbs.forEach(orb => {
-                orb.x += orb.dx;
-                orb.y += orb.dy;
-                if (orb.x < -orb.r || orb.x > width + orb.r) orb.dx *= -1;
-                if (orb.y < -orb.r || orb.y > height + orb.r) orb.dy *= -1;
-
-                const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
-                grad.addColorStop(0, orb.color);
-                grad.addColorStop(1, 'transparent');
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
-                ctx.fill();
+        function frame() {
+            ctx.clearRect(0, 0, W, H);
+            orbs.forEach(o => {
+                const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+                const col = o.isOrange ? `rgba(255,153,51,` : `rgba(19,136,8,`;
+                g.addColorStop(0, col + o.op + ')'); g.addColorStop(1, col + '0)');
+                ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+                o.x += o.dx; o.y += o.dy;
+                if (o.x < -o.r) o.x = W + o.r; if (o.x > W + o.r) o.x = -o.r;
+                if (o.y < -o.r) o.y = H + o.r; if (o.y > H + o.r) o.y = -o.r;
             });
-
-            // Draw Chakras
-            drawAshokaChakra(width * 0.85, height * 0.15, Math.min(width, height) * 0.25, rotationInfo * 0.5, 0.02);
-            drawAshokaChakra(width * 0.1, height * 0.8, Math.min(width, height) * 0.15, -rotationInfo * 0.8, 0.03);
-            drawAshokaChakra(width * 0.5, height * 0.5, Math.min(width, height) * 0.4, rotationInfo * 0.2, 0.015);
-
-            // Draw Particles
+            chakras.forEach(c => drawChakra(c.x * W, c.y * H, c.r, angle * c.speed / Math.abs(c.speed) * (angle * Math.abs(c.speed)), c.alpha));
+            angle += 0.004;
             particles.forEach(p => {
-                p.y += p.speedY;
-                p.x += p.speedX;
-                if (p.y < -50) {
-                    p.y = height + 50;
-                    p.x = Math.random() * width;
-                }
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.save(); ctx.globalAlpha = p.op; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.isOrange ? '#FF9933' : '#138808'; ctx.fill(); ctx.restore();
+                p.y -= p.speed; p.a += p.as; p.x += Math.sin(p.a) * .5;
+                if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
             });
-
-            animationFrameId = requestAnimationFrame(draw);
-        };
-
-        draw();
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            cancelAnimationFrame(animationFrameId);
-        };
+            raf = requestAnimationFrame(frame);
+        }
+        frame();
+        return () => { cancelAnimationFrame(raf); };
     }, []);
-
-    return (
-        <canvas
-            ref={canvasRef}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 0,
-                pointerEvents: 'none'
-            }}
-        />
-    );
-};
-
-export default AnimatedBackground;
+    return <canvas ref={ref} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', width: '100%', height: '100%' }} />;
+}

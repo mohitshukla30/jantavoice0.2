@@ -69,6 +69,19 @@ export const notifAPI = {
   markAllRead: () => api.put('/notifications/read-all'),
 };
 
+export const chatbotAPI = {
+  chat: d => api.post('/chatbot/chat', d),
+};
+
+export const aqiAPI = {
+  get: (lat, lon) => api.get('/aqi', { params: { lat, lon } }),
+};
+
+export const callAPI = {
+  initiate: id => api.post('/calls/' + id + '/initiate'),
+  getLog: id => api.get('/calls/' + id),
+};
+
 export const generateLetter = (complaintId) =>
   api.get('/complaints/' + complaintId + '/generate-letter', { responseType: 'blob' });
 
