@@ -49,7 +49,8 @@ router.delete('/:id', protect, deleteComplaint);
 const fakeDetector = require('../middleware/fakeDetector');
 
 // Add these NEW routes only:
-router.post('/quick-file', protect, fakeDetector, quickFile);
-router.post('/ai-categorize', protect, aiCategorize);
-router.get('/:id/letter', protect, generateFormalLetter);
+const complaintController = require('../controllers/complaintController');
+router.post('/quick-file', protect, fakeDetector, complaintController.quickFile);
+router.post('/ai-categorize', protect, complaintController.aiCategorize);
+router.get('/:id/letter', protect, complaintController.generateComplaintLetter);
 module.exports = router;

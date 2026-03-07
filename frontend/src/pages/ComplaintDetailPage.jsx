@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import StatusTimeline from '../components/StatusTimeline';
 import GovStatusBadge from '../components/GovStatusBadge';
 import { CATEGORY_ICONS, STATUS_COLORS, timeAgo, formatDate, getInitials } from '../utils/helpers';
-import { FaHeart, FaRegHeart, FaArrowLeft, FaTrash, FaBuilding, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaArrowLeft, FaTrash, FaExternalLinkAlt } from 'react-icons/fa';
+import { MdCall } from 'react-icons/md';
 import toast from 'react-hot-toast';
 
 export default function ComplaintDetailPage() {
@@ -20,6 +21,9 @@ export default function ComplaintDetailPage() {
   const [commenting, setCommenting] = useState(false);
   const [imgIdx, setImgIdx] = useState(0);
   const [downloadingLetter, setDownloadingLetter] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [callScript, setCallScript] = useState('');
+  const [calling, setCalling] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -87,6 +91,31 @@ export default function ComplaintDetailPage() {
       toast.error('Failed to generate letter', { id: toastId });
     } finally {
       setDownloadingLetter(false);
+    }
+  };
+
+  const handleInitiateCall = async () => {
+    setCalling(true);
+    const tid = toast.loading('Generating AI voice script...');
+    try {
+      // Assuming api from services
+      const token = localStorage.getItem('jv_token');
+      const res = await fetch(`http://localhost:5000/api/calls/${id}/initiate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCallScript(data.script);
+        setShowCallModal(true);
+        toast.success('Call Script generated', { id: tid });
+      } else {
+        toast.error(data.message || 'Failed', { id: tid });
+      }
+    } catch (err) {
+      toast.error('Network Error', { id: tid });
+    } finally {
+      setCalling(false);
     }
   };
 
@@ -343,14 +372,33 @@ export default function ComplaintDetailPage() {
             )}
 
             {isAdmin && (
-              <div className="bg-white border border-gray-200 rounded-2xl p-4">
+              <div className="bg-white border border-gray-200 rounded-2xl p-4 mt-4">
                 <h4 className="font-heading font-bold text-sm uppercase tracking-wide text-gray-500 mb-3">Admin Actions</h4>
-                <Link to="/admin" className="btn-primary w-full text-center text-sm py-2">Open Admin Panel</Link>
+                <button onClick={handleInitiateCall} disabled={calling} className="btn-primary w-full text-center text-sm py-2 mb-2 flex items-center justify-center gap-2">
+                  <MdCall size={16} /> {calling ? 'Calling AI...' : '📞 Initiate AI Call'}
+                </button>
+                <Link to="/admin" className="btn-secondary w-full text-center text-sm py-2 block">Open Admin Panel</Link>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {showCallModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-[popIn_.3s_ease]">
+            <h2 className="text-xl font-heading font-bold mb-4 flex items-center gap-2">📞 AI Call Script Generated</h2>
+            <p className="text-sm text-gray-500 mb-4">This script is ready to pass into the Twilio Voice Pipeline API.</p>
+            <div className="bg-gray-100 p-4 rounded-xl text-sm font-mono whitespace-pre-wrap overflow-y-auto max-h-64 mb-4 select-all">
+              {callScript}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => { navigator.clipboard.writeText(callScript); toast.success("Copied!"); }} className="btn-secondary px-4 py-2 text-sm">Copy</button>
+              <button onClick={() => setShowCallModal(false)} className="btn-primary px-4 py-2 text-sm">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

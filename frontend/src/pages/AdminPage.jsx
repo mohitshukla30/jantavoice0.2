@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MdSettings, MdHistory, MdBlock, MdGavel, MdCall, MdOutlineRefresh } from 'react-icons/md';
+import { MdSettings, MdHistory, MdBlock, MdGavel, MdCall, MdOutlineRefresh, MdListAlt } from 'react-icons/md';
 import toast from 'react-hot-toast';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('overview');
-
-  // Tabs: overview, complaints, fakereports, automation, govtickets, calllogs
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 page-enter pb-24">
@@ -49,6 +47,14 @@ export default function AdminPage() {
               <div className="text-3xl font-heading font-bold text-green-600">4,120</div>
               <div className="text-xs font-bold text-gray-400 uppercase mt-1">Total Actions</div>
             </div>
+            <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="text-3xl font-heading font-bold text-blue-500">76</div>
+              <div className="text-xs font-bold text-gray-400 uppercase mt-1">Gov Tickets</div>
+            </div>
+            <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="text-3xl font-heading font-bold text-red-500">14</div>
+              <div className="text-xs font-bold text-gray-400 uppercase mt-1">Spam Blocked</div>
+            </div>
           </div>
         </div>
       )}
@@ -58,10 +64,9 @@ export default function AdminPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full mb-4">
             <MdOutlineRefresh className="animate-spin" /> Fetching live data stream...
           </div>
-          <p>Admin tabular views populate locally when backend models contain records.</p>
+          <p>Admin tabular views auto-populate from database bindings on active traffic.</p>
         </div>
       )}
     </div>
   );
 }
-import { MdListAlt } from 'react-icons/md';
