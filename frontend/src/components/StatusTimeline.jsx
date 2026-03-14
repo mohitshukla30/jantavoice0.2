@@ -1,3 +1,5 @@
+import { Check, Circle } from 'lucide-react';
+
 export default function StatusTimeline({ statusHistory = [], currentStatus }) {
   const steps = ['Reported', 'In Progress', 'Resolved'];
   const currentIdx = steps.indexOf(currentStatus);
@@ -18,7 +20,7 @@ export default function StatusTimeline({ statusHistory = [], currentStatus }) {
                 ${done ? 'bg-india-green border-india-green text-white' :
                   active ? 'bg-saffron border-saffron text-white shadow-md shadow-saffron/30' :
                   'bg-white border-gray-300 text-gray-400'}`}>
-                {done ? '✓' : active ? '●' : i + 1}
+                {done ? <Check size={14} /> : active ? <Circle size={8} fill="currentColor" /> : i + 1}
               </div>
               {i < steps.length - 1 && (
                 <div className={`flex-1 h-0.5 ${done ? 'bg-india-green' : 'bg-gray-200'}`} />

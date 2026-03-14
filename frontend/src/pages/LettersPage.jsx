@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { FileText, Download, Wand2, Loader } from 'lucide-react';
 import { complaintAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { FaFilePdf, FaDownload, FaMagic, FaSpinner } from 'react-icons/fa';
 
 export default function LettersPage() {
     const [complaints, setComplaints] = useState([]);
@@ -61,41 +62,41 @@ export default function LettersPage() {
     };
 
     if (loading) {
-        return <div className="p-8 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-saffron border-t-transparent rounded-full" /></div>;
+        return <div className="p-8 flex justify-center pt-20"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
     }
 
     const availableLetters = complaints.filter(c => c.formalLetter && !c.formalLetter.includes('Sample formal letter text.'));
     const pendingLetters = complaints.filter(c => !c.formalLetter || c.formalLetter.includes('Sample formal letter text.'));
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8 pt-24 px-4 pb-12">
             <div>
-                <h1 className="text-3xl font-heading font-bold text-gray-800 flex items-center gap-3">
-                    <FaFilePdf className="text-red-500" />
+                <h1 className="text-3xl font-bold text-foreground flex items-center gap-3 tracking-tight">
+                    <FileText className="text-primary w-8 h-8" />
                     Formal Complaint Letters
                 </h1>
-                <p className="text-gray-500 mt-2">Generate and download official PDF copies of your complaints formatted for Indian Government submission.</p>
+                <p className="text-muted-foreground font-medium mt-3">Generate and download official PDF copies of your complaints formatted for Indian Government submission.</p>
             </div>
 
             {/* Existing Letters */}
             <div>
-                <h2 className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2 mb-4">Generated Letters</h2>
+                <h2 className="text-xl font-bold text-foreground tracking-tight border-b border-border pb-3 mb-5">Generated Letters</h2>
                 {availableLetters.length === 0 ? (
-                    <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500 border border-gray-100 italic">
+                    <div className="glass-card rounded-3xl p-12 text-center text-muted-foreground font-medium">
                         No formal letters generated yet. Generate one from the list below.
                     </div>
                 ) : (
                     <div className="grid gap-4">
                         {availableLetters.map(c => (
-                            <div key={c._id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between group hover:border-saffron/50 transition-colors">
+                            <div key={c._id} className="glass-card p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-primary/50 transition-all">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-500 shrink-0">
-                                        <FaFilePdf size={20} />
+                                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                        <FileText size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-gray-800 text-sm line-clamp-1">{c.title}</h3>
-                                        <div className="text-xs text-gray-500 mt-1 flex items-center gap-3">
-                                            <span className="bg-gray-100 px-2 py-0.5 rounded font-mono font-bold text-gray-600">Ref: {c.referenceNumber}</span>
+                                        <h3 className="font-bold text-foreground text-base line-clamp-1">{c.title}</h3>
+                                        <div className="text-xs text-muted-foreground font-medium mt-1.5 flex items-center flex-wrap gap-3">
+                                            <span className="bg-secondary text-foreground px-2 py-1 rounded-md font-mono font-bold tracking-wider">Ref: {c.referenceNumber}</span>
                                             <span>Issued: {new Date(c.letterGeneratedAt || c.updatedAt).toLocaleDateString()}</span>
                                         </div>
                                     </div>
@@ -103,9 +104,9 @@ export default function LettersPage() {
                                 <button
                                     onClick={() => handleGenerate(c._id, c.title)}
                                     disabled={generatingId === c._id}
-                                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2"
+                                    className="btn btn-secondary flex items-center gap-2 w-full sm:w-auto justify-center"
                                 >
-                                    {generatingId === c._id ? <FaSpinner className="animate-spin" /> : <FaDownload />}
+                                    {generatingId === c._id ? <Loader className="animate-spin w-4 h-4" /> : <Download className="w-4 h-4" />}
                                     <span className="hidden sm:inline">Download PDF</span>
                                 </button>
                             </div>
@@ -116,25 +117,25 @@ export default function LettersPage() {
 
             {/* Generate New */}
             <div>
-                <h2 className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2 mb-4">Available For Generation</h2>
+                <h2 className="text-xl font-bold text-foreground tracking-tight border-b border-border pb-3 mb-5 mt-4">Available For Generation</h2>
                 {pendingLetters.length === 0 ? (
-                    <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500 border border-gray-100 italic">
+                    <div className="glass-card rounded-3xl p-12 text-center text-muted-foreground font-medium">
                         You have no other complaints waiting for letters.
                     </div>
                 ) : (
                     <div className="grid gap-4">
                         {pendingLetters.map(c => (
-                            <div key={c._id} className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-between">
+                            <div key={c._id} className="glass-card p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div>
-                                    <h3 className="font-bold text-gray-700 text-sm line-clamp-1">{c.title}</h3>
-                                    <span className="text-xs text-gray-400 mt-1">Status: {c.status} • Filed: {new Date(c.createdAt).toLocaleDateString()}</span>
+                                    <h3 className="font-bold text-foreground text-base line-clamp-1">{c.title}</h3>
+                                    <span className="text-xs text-muted-foreground font-medium mt-1.5 block">Status: {c.status} • Filed: {new Date(c.createdAt).toLocaleDateString()}</span>
                                 </div>
                                 <button
                                     onClick={() => handleGenerate(c._id, c.title)}
                                     disabled={generatingId === c._id}
-                                    className="bg-saffron hover:bg-saffron-dark text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2"
+                                    className="btn btn-primary flex items-center gap-2 w-full sm:w-auto justify-center"
                                 >
-                                    {generatingId === c._id ? <FaSpinner className="animate-spin" /> : <FaMagic />}
+                                    {generatingId === c._id ? <Loader className="animate-spin w-4 h-4" /> : <Wand2 className="w-4 h-4" />}
                                     <span className="hidden sm:inline">Generate Letter</span>
                                 </button>
                             </div>

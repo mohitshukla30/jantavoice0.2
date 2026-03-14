@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { notificationAPI } from '../services/api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
+import { Bell } from 'lucide-react';
 
 const NotificationContext = createContext();
 export const useNotification = () => useContext(NotificationContext);
@@ -27,7 +28,7 @@ export const NotificationProvider = ({ children }) => {
                 // New notification arrived in background
                 const newCount = currentUnread - prevUnreadRef.current;
                 const latest = unreadList[0];
-                toast(latest?.message || `You have ${newCount} new notification${newCount > 1 ? 's' : ''}!`, { icon: '🔔' });
+                toast(latest?.message || `You have ${newCount} new notification${newCount > 1 ? 's' : ''}!`);
                 setShake(true);
                 setTimeout(() => setShake(false), 3000);
             }

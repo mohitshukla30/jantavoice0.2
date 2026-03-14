@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, FileText, Clock, CheckCircle2, AlertCircle, Loader } from 'lucide-react';
 import { complaintAPI, govAPI } from '../services/api';
 import toast from 'react-hot-toast';
 

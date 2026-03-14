@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Settings, ShieldAlert, Landmark, PhoneCall, RefreshCw, List, Bot, Lightbulb, ClipboardList, FileText, X } from 'lucide-react';
 import axios from 'axios';
-import { MdSettings, MdHistory, MdBlock, MdGavel, MdCall, MdOutlineRefresh, MdListAlt } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import CallTranscriptViewer from '../components/CallTranscriptViewer';
 import { callAPI } from '../services/api';
@@ -23,27 +23,30 @@ export default function AdminPage() {
   useEffect(() => { if (activeTab === 'calllogs') fetchCallLogs(); }, [activeTab]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 page-enter pb-24">
-      <div className="glass p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-white/60">
+    <div className="w-full max-w-7xl mx-auto space-y-6 px-4 sm:px-0 py-4 md:py-8">
+      <div className="glass-card p-6 md:p-8 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-border">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-gray-800">Administrator Console</h1>
-          <p className="text-gray-500 font-medium">Manage AI Automations, Portals, and Flagged Entities.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Administrator Console</h1>
+          <p className="text-muted-foreground font-medium mt-1">Manage AI Automations, Portals, and Flagged Entities.</p>
         </div>
       </div>
 
-      <div className="flex gap-2 border-b border-gray-200 overflow-x-auto scroller-hide pb-2">
+      <div className="flex gap-2 border-b border-border overflow-x-auto scrollbar-none pb-2">
         {[
-          { id: 'overview', icon: MdSettings, label: 'Overview' },
-          { id: 'complaints', icon: MdListAlt, label: 'All Complaints' },
-          { id: 'fakereports', icon: MdBlock, label: 'Fake Reports' },
-          { id: 'automation', icon: MdSettings, label: '🤖 Automation' },
-          { id: 'govtickets', icon: MdGavel, label: '🏛️ Gov Tickets' },
-          { id: 'calllogs', icon: MdCall, label: '📞 Call Logs' }
+          { id: 'overview', icon: Settings, label: 'Overview' },
+          { id: 'complaints', icon: List, label: 'All Complaints' },
+          { id: 'fakereports', icon: ShieldAlert, label: 'Fake Reports' },
+          { id: 'automation', icon: Bot, label: 'Automation' },
+          { id: 'govtickets', icon: Landmark, label: 'Gov Tickets' },
+          { id: 'calllogs', icon: PhoneCall, label: 'Call Logs' }
         ].map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`px-5 py-3 rounded-xl font-bold text-sm whitespace-nowrap flex items-center gap-2 transition-all ${activeTab === t.id ? 'bg-saffron text-white shadow-orange' : 'text-gray-500 hover:bg-gray-100'}`}
+            className={`px-5 py-3 rounded-xl font-bold text-sm whitespace-nowrap flex items-center gap-2 transition-all ${activeTab === t.id
+              ? 'bg-primary/10 text-primary border border-primary/20'
+              : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
+              }`}
           >
             <t.icon size={18} /> {t.label}
           </button>
@@ -51,102 +54,111 @@ export default function AdminPage() {
       </div>
 
       {activeTab === 'overview' && (
-        <div className="glass p-12 text-center rounded-2xl border border-white">
-          <h2 className="text-2xl font-heading font-bold text-gray-800 mb-2">Systems Online</h2>
-          <p className="text-gray-500">Node-cron services are actively monitoring gov schemas.</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-            <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="text-3xl font-heading font-bold text-saffron">98.2%</div>
-              <div className="text-xs font-bold text-gray-400 uppercase mt-1">AI Accuracy</div>
+        <div className="glass-card p-8 md:p-12 text-center rounded-3xl border border-border mt-8">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Systems Online</h2>
+          <p className="text-muted-foreground text-sm font-medium">Node-cron services are actively monitoring gov schemas.</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 text-left">
+            <div className="p-6 bg-secondary/30 rounded-2xl border border-border">
+              <div className="text-3xl font-bold text-primary">98.2%</div>
+              <div className="text-xs font-bold text-muted-foreground uppercase mt-2 tracking-wider">AI Accuracy</div>
             </div>
-            <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="text-3xl font-heading font-bold text-green-600">4,120</div>
-              <div className="text-xs font-bold text-gray-400 uppercase mt-1">Total Actions</div>
+            <div className="p-6 bg-secondary/30 rounded-2xl border border-border">
+              <div className="text-3xl font-bold text-green-500">4,120</div>
+              <div className="text-xs font-bold text-muted-foreground uppercase mt-2 tracking-wider">Total Actions</div>
             </div>
-            <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="text-3xl font-heading font-bold text-blue-500">76</div>
-              <div className="text-xs font-bold text-gray-400 uppercase mt-1">Gov Tickets</div>
+            <div className="p-6 bg-secondary/30 rounded-2xl border border-border">
+              <div className="text-3xl font-bold text-blue-500">76</div>
+              <div className="text-xs font-bold text-muted-foreground uppercase mt-2 tracking-wider">Gov Tickets</div>
             </div>
-            <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="text-3xl font-heading font-bold text-red-500">14</div>
-              <div className="text-xs font-bold text-gray-400 uppercase mt-1">Spam Blocked</div>
+            <div className="p-6 bg-secondary/30 rounded-2xl border border-border">
+              <div className="text-3xl font-bold text-destructive">14</div>
+              <div className="text-xs font-bold text-muted-foreground uppercase mt-2 tracking-wider">Spam Blocked</div>
             </div>
           </div>
         </div>
       )}
 
       {activeTab !== 'overview' && activeTab !== 'calllogs' && (
-        <div className="glass p-12 text-center rounded-2xl border border-white text-gray-500 font-bold">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full mb-4">
-            <MdOutlineRefresh className="animate-spin" /> Fetching live data stream...
+        <div className="glass-card p-12 text-center rounded-3xl border border-border flex flex-col items-center justify-center mt-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/50 rounded-full mb-4 text-sm font-bold text-muted-foreground">
+            <RefreshCw size={16} className="animate-spin text-primary" /> Fetching live data stream...
           </div>
-          <p>Admin tabular views auto-populate from database bindings on active traffic.</p>
+          <p className="text-muted-foreground text-sm font-medium max-w-md">Admin tabular views auto-populate from database bindings on active traffic.</p>
         </div>
       )}
 
       {activeTab === 'calllogs' && (
-        <div className="glass p-6 md:p-12 text-center rounded-2xl border border-white">
+        <div className="glass-card p-6 md:p-12 text-center rounded-3xl border border-border mt-8">
           {/* Stats row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '1rem', marginBottom: '1.5rem', textAlign: 'left' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-left">
             {[
-              { label: 'Total Calls', value: callLogs.length, color: '#FF9933' },
-              { label: 'Completed', value: callLogs.filter(c => c.status === 'Completed').length, color: '#138808' },
-              { label: 'Transcribed', value: callLogs.filter(c => c.status === 'Transcribed').length, color: '#3B82F6' },
-              { label: 'Failed/No Answer', value: callLogs.filter(c => ['Failed', 'No Answer'].includes(c.status)).length, color: '#EF4444' }
-            ].map(s => (
-              <div key={s.label} style={{ background: 'white', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,.06)', borderLeft: `4px solid ${s.color}` }}>
-                <div style={{ fontSize: '1.8rem', fontWeight: '800', fontFamily: 'Rajdhani,sans-serif', color: s.color }}>{s.value}</div>
-                <div style={{ fontSize: '.8rem', color: '#666', marginTop: '.2rem' }}>{s.label}</div>
+              { label: 'Total Calls', value: callLogs.length, color: 'text-foreground' },
+              { label: 'Completed', value: callLogs.filter(c => c.status === 'Completed').length, color: 'text-green-500' },
+              { label: 'Transcribed', value: callLogs.filter(c => c.status === 'Transcribed').length, color: 'text-blue-500' },
+              { label: 'Failed/No Answer', value: callLogs.filter(c => ['Failed', 'No Answer'].includes(c.status)).length, color: 'text-destructive' }
+            ].map((s, i) => (
+              <div key={s.label} className="bg-secondary/30 rounded-2xl p-5 border border-border">
+                <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
+                <div className="text-xs font-bold text-muted-foreground mt-2 tracking-wider uppercase">{s.label}</div>
               </div>
             ))}
           </div>
 
           {/* Note about Twilio */}
-          <div style={{ background: '#FFF3E0', borderRadius: '12px', padding: '1rem', marginBottom: '1.25rem', border: '1px solid rgba(255,153,51,.25)', fontSize: '.82rem', color: '#555', textAlign: 'left' }}>
-            💡 <strong>Twilio Integration:</strong> Get free trial at <a href="https://twilio.com" target="_blank" rel="noreferrer" style={{ color: '#FF9933' }}>twilio.com</a> ($15 credit).
-            Add keys to <code style={{ background: '#F3F4F6', padding: '1px 5px', borderRadius: '4px' }}>.env</code> to enable real calls.
+          <div className="bg-primary/10 border border-primary/20 rounded-2xl p-5 mb-8 text-sm text-left text-muted-foreground leading-relaxed">
+            <div className="font-bold text-primary mb-2 flex items-center gap-2"><Lightbulb size={16} /> Twilio Integration</div>
+            Get free trial at <a href="https://twilio.com" target="_blank" rel="noreferrer" className="text-primary hover:text-primary/80 font-bold transition-colors">twilio.com</a> ($15 credit).
+            Add keys to <code className="bg-secondary px-1.5 py-0.5 rounded text-blue-400 text-xs mx-1">.env</code> to enable real calls.
             Without Twilio, scripts are generated but calls are simulated.
           </div>
 
           {/* Call logs table */}
-          <div style={{ background: 'white', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
-            <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontWeight: '800', color: '#1A1A1A' }}>All AI Calls</div>
-              <button onClick={fetchCallLogs} style={{ background: '#F3F4F6', border: 'none', borderRadius: '8px', padding: '6px 14px', cursor: 'pointer', fontSize: '.8rem', fontWeight: '700', fontFamily: 'Nunito,sans-serif', color: '#333' }}>🔄 Refresh</button>
+          <div className="bg-background rounded-2xl border border-border overflow-hidden text-left shadow-sm">
+            <div className="p-4 md:p-6 border-b border-border flex justify-between items-center bg-secondary/10">
+              <div className="font-bold text-foreground flex items-center gap-2"><PhoneCall className="w-5 h-5 text-primary" /> All AI Calls</div>
+              <button onClick={fetchCallLogs} className="btn btn-secondary text-xs px-3 py-1.5 flex items-center gap-2">
+                <RefreshCw size={14} className={callsLoading ? 'animate-spin' : ''} /> Refresh
+              </button>
             </div>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr style={{ background: '#F9FAF7' }}>
+                  <tr className="bg-secondary/30">
                     {['Complaint', 'Department', 'Status', 'Duration', 'Date', 'Actions'].map(h => (
-                      <th key={h} style={{ padding: '10px 16px', fontSize: '.75rem', fontWeight: '800', color: '#666', borderBottom: '1px solid #F3F4F6' }}>{h}</th>
+                      <th key={h} className="p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>
-                  {callsLoading && <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}><MdOutlineRefresh className="animate-spin inline text-xl" /></td></tr>}
+                <tbody className="divide-y divide-border">
+                  {callsLoading && <tr><td colSpan="6" className="p-12 text-center text-muted-foreground"><RefreshCw className="animate-spin inline-block w-6 h-6 text-primary" /></td></tr>}
                   {!callsLoading && callLogs.map(log => {
-                    const STATUS_COLORS = { 'Completed': '#138808', 'Transcribed': '#3B82F6', 'Failed': '#EF4444', 'No Answer': '#EF4444', 'In Progress': '#FF9933', 'Calling': '#8B5CF6', 'Script Generated': '#9CA3AF', 'Awaiting Permission': '#F59E0B' };
-                    const color = STATUS_COLORS[log.status] || '#9CA3AF';
+                    const statusClass = log.status === 'Completed' ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                      : log.status === 'Transcribed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                        : ['Failed', 'No Answer'].includes(log.status) ? 'bg-destructive/10 text-destructive border-destructive/20'
+                          : log.status === 'In Progress' ? 'bg-primary/10 text-primary border-primary/20'
+                            : 'bg-secondary text-muted-foreground border-border';
                     return (
-                      <tr key={log._id} style={{ borderBottom: '1px solid #F9FAF7', transition: 'background .15s' }} onMouseEnter={e => e.currentTarget.style.background = '#FAFAF7'} onMouseLeave={e => e.currentTarget.style.background = 'white'}>
-                        <td style={{ padding: '12px 16px', fontSize: '.83rem', fontWeight: '600', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#333' }}>{log.complaint?.title || 'N/A'}</td>
-                        <td style={{ padding: '12px 16px', fontSize: '.8rem', color: '#666' }}>{log.targetDepartment}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{ background: color + '18', color, border: `1px solid ${color}33`, padding: '3px 10px', borderRadius: '20px', fontSize: '.72rem', fontWeight: '800' }}>{log.status}</span>
+                      <tr key={log._id} className="hover:bg-secondary/20 transition-colors">
+                        <td className="p-4 text-sm font-bold text-foreground max-w-[200px] truncate">{log.complaint?.title || 'N/A'}</td>
+                        <td className="p-4 text-sm text-muted-foreground">{log.targetDepartment}</td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border tracking-wider uppercase ${statusClass}`}>{log.status}</span>
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '.8rem', color: '#666' }}>{log.duration ? `${Math.floor(log.duration / 60)}m ${log.duration % 60}s` : '—'}</td>
-                        <td style={{ padding: '12px 16px', fontSize: '.78rem', color: '#999' }}>{new Date(log.createdAt).toLocaleDateString('en-IN')}</td>
-                        <td style={{ padding: '12px 16px' }}>
-                          <div style={{ display: 'flex', gap: '.4rem' }}>
-                            <button onClick={() => setSelectedCallId(log._id)}
-                              style={{ padding: '5px 12px', background: '#F0FDF4', color: '#138808', border: '1px solid rgba(19,136,8,.2)', borderRadius: '8px', cursor: 'pointer', fontSize: '.75rem', fontWeight: '700', fontFamily: 'Nunito,sans-serif' }}>
-                              📋 Transcript
+                        <td className="p-4 text-sm font-medium text-muted-foreground">{log.duration ? `${Math.floor(log.duration / 60)}m ${log.duration % 60}s` : '—'}</td>
+                        <td className="p-4 text-xs font-medium text-muted-foreground">{new Date(log.createdAt).toLocaleDateString('en-IN')}</td>
+                        <td className="p-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => setSelectedCallId(log._id)} className="btn btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5">
+                              <ClipboardList size={14} /> Transcript
                             </button>
                             {log.script && (
-                              <button onClick={() => { const m = document.createElement('div'); m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem'; m.innerHTML = `<div class="glass" style="background:white;border-radius:20px;padding:1.5rem;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;color:#1a1a1a"><div style="font-weight:800;margin-bottom:1rem">AI Call Script</div><pre style="font-size:.8rem;line-height:1.7;white-space:pre-wrap;font-family:Nunito,sans-serif">${log.script.replace(/</g, '&lt;')}</pre><button onclick="this.closest('[style*=fixed]').remove()" style="margin-top:1rem;padding:8px 20px;background:#FF9933;color:white;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-family:Nunito,sans-serif">Close</button></div>`; document.body.appendChild(m); }}
-                                style={{ padding: '5px 12px', background: '#FFF3E0', color: '#E8720C', border: '1px solid rgba(255,153,51,.2)', borderRadius: '8px', cursor: 'pointer', fontSize: '.75rem', fontWeight: '700', fontFamily: 'Nunito,sans-serif' }}>
-                                📝 Script
+                              <button onClick={() => {
+                                const m = document.createElement('div');
+                                m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+                                m.innerHTML = `<div class="bg-card border border-border rounded-2xl w-full max-w-xl max-h-[80vh] flex flex-col shadow-2xl overflow-hidden"><div class="p-6 border-b border-border font-bold text-foreground flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg> AI Call Script</div><div class="p-6 overflow-y-auto overflow-x-hidden flex-1"><pre class="text-sm text-muted-foreground whitespace-pre-wrap font-mono leading-relaxed">${log.script.replace(/</g, '&lt;')}</pre></div><div class="p-4 border-t border-border bg-secondary/30 text-right"><button onclick="this.closest('[style*=fixed]').remove()" class="px-5 py-2 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors text-sm">Close</button></div></div>`;
+                                document.body.appendChild(m);
+                              }} className="btn border border-primary/20 text-primary hover:bg-primary/10 text-xs px-3 py-1.5 flex items-center gap-1.5 rounded-xl transition-all">
+                                <FileText size={14} /> Script
                               </button>
                             )}
                           </div>
@@ -155,7 +167,7 @@ export default function AdminPage() {
                     );
                   })}
                   {!callsLoading && callLogs.length === 0 && (
-                    <tr><td colSpan="6" style={{ padding: '3rem', textAlign: 'center', color: '#999', fontSize: '.9rem' }}>No calls yet. Use "📞 Call Department via AI" on any complaint.</td></tr>
+                    <tr><td colSpan="6" className="p-12 text-center text-sm font-medium text-muted-foreground">No calls yet. Use "Call Department via AI" on any complaint.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -164,13 +176,15 @@ export default function AdminPage() {
 
           {/* Transcript viewer modal */}
           {selectedCallId && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', zIndex: 2100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', textAlign: 'left' }} onClick={e => e.target === e.currentTarget && setSelectedCallId(null)}>
-              <div style={{ background: 'white', borderRadius: '24px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '1.5rem', boxShadow: '0 24px 80px rgba(0,0,0,.25)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                  <div style={{ fontWeight: '800', fontSize: '1.1rem', fontFamily: 'Rajdhani,sans-serif', color: '#333' }}>📞 Call Transcript</div>
-                  <button onClick={() => setSelectedCallId(null)} style={{ background: '#F3F4F6', color: '#333', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '16px' }}>✕</button>
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 text-left" onClick={e => e.target === e.currentTarget && setSelectedCallId(null)}>
+              <div className="bg-card border border-border rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+                <div className="flex justify-between items-center p-6 border-b border-border bg-secondary/10">
+                  <div className="font-bold text-lg text-foreground flex items-center gap-2"><PhoneCall className="w-5 h-5 text-primary" /> Call Transcript</div>
+                  <button onClick={() => setSelectedCallId(null)} className="w-8 h-8 flex items-center justify-center rounded-full bg-secondary hover:bg-secondary/80 text-muted-foreground transition-colors"><X size={18} /></button>
                 </div>
-                <CallTranscriptViewer callLogId={selectedCallId} />
+                <div className="flex-1 overflow-y-auto p-6">
+                  <CallTranscriptViewer callLogId={selectedCallId} />
+                </div>
               </div>
             </div>
           )}

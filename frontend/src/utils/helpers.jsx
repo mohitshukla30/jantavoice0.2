@@ -17,10 +17,17 @@ export const STATUS_DOT = {
   Rejected: 'bg-gray-400',
 };
 
+import { Route, Droplets, Zap, Trash2, TreePine, ShieldAlert, Volume2, ClipboardList } from 'lucide-react';
+
 export const CATEGORY_ICONS = {
-  Roads: '🛣️', Water: '💧', Electricity: '⚡',
-  Sanitation: '🗑️', Parks: '🌳', Safety: '🛡️',
-  Noise: '🔊', Other: '📋',
+  Roads: <Route size={16} />,
+  Water: <Droplets size={16} />,
+  Electricity: <Zap size={16} />,
+  Sanitation: <Trash2 size={16} />,
+  Parks: <TreePine size={16} />,
+  Safety: <ShieldAlert size={16} />,
+  Noise: <Volume2 size={16} />,
+  Other: <ClipboardList size={16} />,
 };
 
 export const CATEGORY_ACCENT = {
@@ -30,11 +37,11 @@ export const CATEGORY_ACCENT = {
 };
 
 export const STATES = [
-  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
-  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
-  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
-  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
-  'Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh','Puducherry',
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
+  'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
+  'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh',
+  'Uttarakhand', 'West Bengal', 'Delhi', 'Jammu & Kashmir', 'Ladakh', 'Puducherry',
 ];
 
 export const getInitials = (name = '') =>

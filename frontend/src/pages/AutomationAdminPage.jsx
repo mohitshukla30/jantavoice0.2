@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Bot, Play, ToggleRight, ToggleLeft, History, CheckCircle2, XCircle, Loader } from 'lucide-react';
 import { automationAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { FaRobot, FaPlay, FaToggleOn, FaToggleOff, FaHistory, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function AutomationAdminPage() {
@@ -55,25 +56,25 @@ export default function AutomationAdminPage() {
     };
 
     if (loading) {
-        return <div className="p-8 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-saffron border-t-transparent rounded-full" /></div>;
+        return <div className="p-12 flex justify-center"><Loader className="animate-spin text-primary w-8 h-8" /></div>;
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="w-full max-w-7xl mx-auto space-y-8 px-4 sm:px-0 py-4 md:py-8">
+            <div className="glass-card p-6 md:p-8 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-border">
                 <div>
-                    <h1 className="text-3xl font-heading font-bold text-gray-800 flex items-center gap-3">
-                        <FaRobot className="text-saffron" />
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+                        <Bot className="text-primary w-8 h-8" />
                         Automation Engine
                     </h1>
-                    <p className="text-gray-500">Manage background jobs, AI triggers, and view automated tracking logs.</p>
+                    <p className="text-muted-foreground font-medium mt-2">Manage background jobs, AI triggers, and view automated tracking logs.</p>
                 </div>
                 <button
                     onClick={handleRunNow}
                     disabled={running}
-                    className={`px-6 py-2.5 rounded-lg font-bold text-white shadow-sm flex items-center gap-2 transition-all ${running ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-black hover:-translate-y-0.5'}`}
+                    className={`btn px-6 py-3 font-bold flex items-center gap-2 transition-all ${running ? 'bg-secondary text-muted-foreground cursor-not-allowed' : 'btn-primary'}`}
                 >
-                    {running ? <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : <FaPlay className="text-sm" />}
+                    {running ? <Loader className="animate-spin w-5 h-5" /> : <Play className="w-5 h-5 fill-current" />}
                     Deploy Engine Now
                 </button>
             </div>
@@ -81,71 +82,71 @@ export default function AutomationAdminPage() {
             {/* Rules Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {rules.map(rule => (
-                    <div key={rule._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 relative overflow-hidden group">
+                    <div key={rule._id} className="glass-card rounded-2xl p-6 relative overflow-hidden border border-border group transition-all hover:bg-secondary/20">
                         {/* Active Indicator Bar */}
-                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${rule.isActive ? 'bg-india-green' : 'bg-gray-300'}`}></div>
+                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 transition-colors ${rule.isActive ? 'bg-green-500' : 'bg-secondary-foreground/20'}`}></div>
 
                         <div className="flex justify-between items-start mb-3 pl-2">
-                            <h3 className="font-bold text-gray-800 text-sm">{rule.name}</h3>
+                            <h3 className="font-bold text-foreground text-sm">{rule.name}</h3>
                             <button
                                 onClick={() => handleToggle(rule._id)}
-                                className={`text-2xl transition-colors ${rule.isActive ? 'text-india-green hover:text-india-green-dark' : 'text-gray-300 hover:text-gray-500'}`}
+                                className={`transition-colors ${rule.isActive ? 'text-green-500' : 'text-muted-foreground'}`}
                             >
-                                {rule.isActive ? <FaToggleOn /> : <FaToggleOff />}
+                                {rule.isActive ? <ToggleRight className="w-7 h-7" /> : <ToggleLeft className="w-7 h-7" />}
                             </button>
                         </div>
-                        <p className="text-xs text-gray-500 mb-4 pl-2 h-10">{rule.description}</p>
+                        <p className="text-sm text-muted-foreground mb-6 pl-2 min-h-[40px] leading-relaxed">{rule.description}</p>
 
-                        <div className="pl-2 pt-4 border-t border-gray-100 flex items-center justify-between text-xs">
-                            <span className="text-gray-400 font-mono">ID: {rule.id}</span>
-                            <span className="font-bold text-saffron bg-saffron/10 px-2 py-1 rounded">Runs: {rule.runCount}</span>
+                        <div className="pl-2 pt-4 border-t border-border flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground font-mono">ID: {rule.id}</span>
+                            <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full uppercase tracking-wider">Runs: {rule.runCount}</span>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Execution Logs */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
-                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                    <FaHistory className="text-gray-400" />
-                    <h2 className="text-lg font-bold text-gray-800">Recent Executions (Last 50)</h2>
+            <div className="glass-card rounded-3xl border border-border overflow-hidden mt-12 shadow-sm">
+                <div className="p-6 border-b border-border bg-secondary/10 flex items-center gap-3">
+                    <History className="text-primary w-5 h-5" />
+                    <h2 className="text-lg font-bold text-foreground">Recent Executions (Last 50)</h2>
                 </div>
 
                 {logs.length === 0 ? (
-                    <div className="p-8 text-center text-gray-400">
+                    <div className="p-12 text-center text-muted-foreground text-sm font-medium">
                         <p>No actions have been executed by the engine yet.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                                    <th className="p-4">Time</th>
-                                    <th className="p-4">Rule Initiator</th>
-                                    <th className="p-4">Target Complaint</th>
-                                    <th className="p-4">Engine Action</th>
-                                    <th className="p-4">Status</th>
+                                <tr className="bg-secondary/30">
+                                    <th className="p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border">Time</th>
+                                    <th className="p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border">Rule Initiator</th>
+                                    <th className="p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border">Target Complaint</th>
+                                    <th className="p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border">Engine Action</th>
+                                    <th className="p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border">Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border">
                                 {logs.map(log => (
-                                    <tr key={log._id} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors text-sm">
-                                        <td className="p-4 font-mono text-xs text-gray-500 whitespace-nowrap">
+                                    <tr key={log._id} className="hover:bg-secondary/20 transition-colors">
+                                        <td className="p-4 text-xs text-muted-foreground font-medium whitespace-nowrap">
                                             {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                                         </td>
-                                        <td className="p-4 font-bold text-gray-700">{log.ruleName}</td>
-                                        <td className="p-4 text-gray-600 truncate max-w-xs">{log.complaintTitle || 'Unknown / Deleted'}</td>
+                                        <td className="p-4 text-sm font-bold text-foreground">{log.ruleName}</td>
+                                        <td className="p-4 text-sm text-muted-foreground truncate max-w-xs">{log.complaintTitle || 'Unknown / Deleted'}</td>
                                         <td className="p-4">
-                                            <span className="bg-blue-50 text-blue-600 border border-blue-100 px-2 py-1 rounded text-xs font-mono">
+                                            <span className="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold">
                                                 {log.action}
                                             </span>
-                                            <p className="text-xs text-gray-500 mt-1">{log.result}</p>
+                                            <p className="text-xs text-muted-foreground font-medium mt-2">{log.result}</p>
                                         </td>
                                         <td className="p-4">
                                             {log.success ? (
-                                                <FaCheckCircle className="text-india-green text-lg" title="Success" />
+                                                <CheckCircle2 className="text-green-500 w-5 h-5" title="Success" />
                                             ) : (
-                                                <FaTimesCircle className="text-red-500 text-lg" title="Failed" />
+                                                <XCircle className="text-destructive w-5 h-5" title="Failed" />
                                             )}
                                         </td>
                                     </tr>

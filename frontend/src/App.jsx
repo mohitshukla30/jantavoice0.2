@@ -1,9 +1,29 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import AnimatedBackground from './components/AnimatedBackground';
 import Navbar from './components/Navbar';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Map } from 'lucide-react';
+
+// Smooth fade and slide transition for better performance
+export function PageContainer({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98, y: 15 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: -15 }}
+      transition={{
+        duration: 0.3,
+        ease: [0.22, 1, 0.36, 1] // Apple-like ease-out curve
+      }}
+      className="w-full h-full"
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
@@ -20,7 +40,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import LettersPage from './pages/LettersPage';
 import AQIMonitorPage from './pages/AQIMonitorPage';
 
-import Sidebar from './components/Sidebar';
+import BottomNav from './components/BottomNav';
 import ChatBot from './components/ChatBot';
 import AQIWidget from './components/AQIWidget';
 import VoiceFAB from './components/VoiceFAB';
@@ -56,42 +76,44 @@ function AppContent() {
     <div className="min-h-screen font-body text-gray-800" style={{ position: 'relative', zIndex: 1 }}>
       <Navbar />
 
-      <div className="flex pt-[60px]">
-        {/* Sidebar only on larger screens if not on auth pages */}
-        {!hideSidebar && (
-          <div className="hidden md:block w-60 shrink-0">
-            <Sidebar />
-          </div>
-        )}
-
-        {/* Main Content Area */}
-        <main className={`flex-1 w-full p-4 lg:p-6 min-h-[calc(100vh-60px)]`}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/landing" element={<LandingPage />} />
-            <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
-            <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
-            <Route path="/feed" element={<FeedPage />} />
-            <Route path="/complaint/:id" element={<ComplaintDetailPage />} />
-            <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
-            <Route path="/my-complaints" element={<ProtectedRoute><MyComplaintsPage /></ProtectedRoute>} />
-            <Route path="/gov-tracking" element={<ProtectedRoute><GovTrackingPage /></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-            <Route path="/letters" element={<ProtectedRoute><LettersPage /></ProtectedRoute>} />
-            <Route path="/automation-admin" element={<AdminRoute><AutomationAdminPage /></AdminRoute>} />
-            <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
-            <Route path="/aqi-monitor" element={<AQIMonitorPage />} />
-            <Route path="*" element={
-              <div className="pt-20 min-h-screen flex flex-col items-center justify-center text-center px-4">
-                <div className="text-7xl opacity-30 mb-4">🗺️</div>
-                <h2 className="font-heading font-bold text-3xl text-gray-600 mb-2">Page Not Found</h2>
-                <p className="text-gray-400 mb-5">The page you're looking for doesn't exist.</p>
-                <a href="/" className="bg-saffron text-white font-bold px-6 py-3 rounded-xl hover:bg-saffron-dark transition-colors inline-flex">← Go Home</a>
-              </div>
-            } />
-          </Routes>
+      <div className="flex pt-[80px] w-full max-w-7xl mx-auto">
+        {/* Main Content Area - Full Width */}
+        <main className={`flex-1 w-full p-4 lg:p-6 pb-24 md:pb-6 min-h-[calc(100vh-80px)]`}>
+          <AnimatePresence mode="wait" initial={false}>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<PageContainer><HomePage /></PageContainer>} />
+              <Route path="/landing" element={<PageContainer><LandingPage /></PageContainer>} />
+              <Route path="/login" element={<PageContainer><PublicOnlyRoute><LoginPage /></PublicOnlyRoute></PageContainer>} />
+              <Route path="/register" element={<PageContainer><PublicOnlyRoute><RegisterPage /></PublicOnlyRoute></PageContainer>} />
+              <Route path="/feed" element={<PageContainer><FeedPage /></PageContainer>} />
+              <Route path="/complaint/:id" element={<PageContainer><ComplaintDetailPage /></PageContainer>} />
+              <Route path="/report" element={<PageContainer><ProtectedRoute><ReportPage /></ProtectedRoute></PageContainer>} />
+              <Route path="/my-complaints" element={<PageContainer><ProtectedRoute><MyComplaintsPage /></ProtectedRoute></PageContainer>} />
+              <Route path="/gov-tracking" element={<PageContainer><ProtectedRoute><GovTrackingPage /></ProtectedRoute></PageContainer>} />
+              <Route path="/notifications" element={<PageContainer><ProtectedRoute><NotificationsPage /></ProtectedRoute></PageContainer>} />
+              <Route path="/letters" element={<PageContainer><ProtectedRoute><LettersPage /></ProtectedRoute></PageContainer>} />
+              <Route path="/automation-admin" element={<PageContainer><AdminRoute><AutomationAdminPage /></AdminRoute></PageContainer>} />
+              <Route path="/admin" element={<PageContainer><AdminRoute><AdminPage /></AdminRoute></PageContainer>} />
+              <Route path="/aqi-monitor" element={<PageContainer><AQIMonitorPage /></PageContainer>} />
+              <Route path="*" element={
+                <PageContainer>
+                  <div className="pt-20 min-h-screen flex flex-col items-center justify-center text-center px-4">
+                    <div className="flex justify-center mb-6 text-primary"><Map size={80} strokeWidth={1} /></div>
+                    <h2 className="font-heading font-bold text-3xl text-gray-600 mb-2">Page Not Found</h2>
+                    <p className="text-gray-400 mb-5">The page you're looking for doesn't exist.</p>
+                    <a href="/" className="inline-flex items-center gap-2 btn-primary">
+                      ← Go Home
+                    </a>
+                  </div>
+                </PageContainer>
+              } />
+            </Routes>
+          </AnimatePresence>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      {!hideSidebar && <BottomNav />}
 
       {/* Global Widgets */}
       <ChatBot onOpenReport={() => window.location.href = '/report?tab=voice'} />
